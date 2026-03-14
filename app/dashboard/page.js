@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { logout } from '@/app/actions/auth';
 import { fetchAllUsers } from '@/app/actions/admin';
+import { checkIfWinner } from '@/app/actions/events';
 import UserList from './components/UserList';
 import Chatbot from './components/Chatbot';
 
@@ -17,6 +18,7 @@ export default async function DashboardPage() {
     const session = JSON.parse(sessionCookie.value);
     console.log(session)
     const users = (session.role === 'dba' || session.role === 'volunteer') ? await fetchAllUsers() : [];
+    const isWinner = await checkIfWinner(session.userId);
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col items-center pt-24 pb-20 px-4">
@@ -43,6 +45,18 @@ export default async function DashboardPage() {
                             <Link href="/logistics" className="group p-6 rounded-xl border-2 border-transparent bg-green-50 hover:bg-green-600 hover:text-white transition-all transform hover:-translate-y-1 hover:shadow-lg">
                                 <h3 className="text-xl font-bold mb-2 group-hover:text-white text-green-900 font-sans">Logistics Hub →</h3>
                                 <p className="opacity-80 group-hover:text-green-100 text-green-700 font-medium text-sm">Manage your travel and accommodation details.</p>
+                            </Link>
+                        )}
+
+                        {isWinner && (
+                            <Link href="/learn" className="group p-6 rounded-xl border-2 border-yellow-200 bg-gradient-to-br from-yellow-50 to-orange-50 hover:from-yellow-400 hover:to-orange-500 hover:text-white hover:border-transparent transition-all transform hover:-translate-y-1 hover:shadow-xl col-span-1 md:col-span-2 shadow-sm text-left relative overflow-hidden">
+                                <div className="absolute top-0 right-0 bg-gradient-to-l from-yellow-400 to-yellow-300 text-yellow-900 text-xs font-black uppercase tracking-wider px-4 py-1.5 rounded-bl-xl shadow-sm z-10 group-hover:opacity-0 transition">
+                                    🏆 EXCLUSIVE
+                                </div>
+                                <h3 className="text-xl font-bold mb-2 group-hover:text-white text-yellow-900 font-sans relative z-10 flex items-center">
+                                    <span className="text-2xl mr-2">👑</span> Champion's Learning Hub →
+                                </h3>
+                                <p className="opacity-80 group-hover:text-yellow-50 text-yellow-800 font-medium text-sm relative z-10">Premium educational resources unlocked exclusively for event winners.</p>
                             </Link>
                         )}
                     </div>

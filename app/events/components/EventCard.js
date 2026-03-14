@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { deleteEvent, registerForEvent, fetchEventRegistrations } from '@/app/actions/events';
+import { deleteEvent, registerForEvent, fetchEventRegistrations, setEventWinner } from '@/app/actions/events';
+import { toast } from 'sonner';
 
 export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
     const [loading, setLoading] = useState(false);
@@ -13,6 +14,7 @@ export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
     const [showRegistrations, setShowRegistrations] = useState(false);
     const [registrations, setRegistrations] = useState([]);
     const [loadingRegs, setLoadingRegs] = useState(false);
+    const [settingWinner, setSettingWinner] = useState(false);
 
     async function handleRegister() {
         setLoading(true);
@@ -43,9 +45,32 @@ export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
         setShowRegistrations(!showRegistrations);
     }
 
+    async function handleSetWinner(userId) {
+        setSettingWinner(true);
+        const formData = new FormData();
+        formData.append('eventId', evt.id);
+        formData.append('winnerId', userId);
+
+        const res = await setEventWinner(formData);
+
+        if (res?.error) {
+            toast.error(res.error);
+        } else {
+            toast.success('Winner successfully selected! 🎉');
+        }
+        setSettingWinner(false);
+    }
+
     return (
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
-            <div className="flex justify-between items-start mb-4">
+        <div className={`bg-white p-6 rounded-2xl shadow-sm border hover:shadow-md transition relative overflow-hidden ${evt.winner ? 'border-yellow-400 border-2' : 'border-gray-100'}`}>
+            {evt.winner && (
+                <div className="absolute top-0 right-0 bg-gradient-to-l from-yellow-400 to-yellow-300 text-yellow-900 text-xs font-black uppercase tracking-wider px-4 py-1.5 rounded-bl-xl shadow-sm flex items-center gap-1.5">
+                    <span>🏆</span> Current Winner
+                </div>
+            )}
+
+            <div className="flex justify-between items-start mb-4 mt-2">
+
                 <h2 className="text-2xl font-bold text-gray-800">{evt.title}</h2>
                 {isAdmin && (
                     <div>
@@ -76,6 +101,19 @@ export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
             </div>
 
             <p className="text-gray-600 mb-6 leading-relaxed">{evt.description}</p>
+
+            {evt.winner && (
+                <div className="mb-6 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 p-4 rounded-xl flex items-center gap-4">
+                    <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center shadow-inner text-2xl">
+                        👑
+                    </div>
+                    <div>
+                        <h4 className="text-sm font-bold text-yellow-800 uppercase tracking-widest mb-0.5">Winner</h4>
+                        <p className="text-lg font-black text-gray-900">{evt.winner.name}</p>
+                        <p className="text-xs font-medium text-gray-500">{evt.winner.email}</p>
+                    </div>
+                </div>
+            )}
 
             {message && (
                 <div className={`mb-4 p-3 rounded-lg text-sm font-medium ${message.includes('Success') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
@@ -152,11 +190,25 @@ export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
                                         <p className="font-medium text-gray-800">{reg.fullName}</p>
                                         <p className="text-gray-500 text-xs">{reg.email}</p>
                                     </div>
-                                    <div className="text-right">
-                                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${reg.role === 'student' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
-                                            {reg.role}
-                                        </span>
-                                        {reg.isVolunteer && <span className="block text-xs text-green-600 mt-1 font-bold">Volunteer</span>}
+                                    <div className="text-right flex items-center gap-3">
+                                        <div className="text-right">
+                                            <span className={`text-xs px-2 py-1 rounded-full font-medium ${reg.role === 'student' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
+                                                {reg.role}
+                                            </span>
+                                            {reg.isVolunteer && <span className="block text-xs text-green-600 mt-1 font-bold">Volunteer</span>}
+                                        </div>
+                                        {isAdmin && !evt.winner && (
+                                            <button
+                                                onClick={() => handleSetWinner(reg.id)}
+                                                disabled={settingWinner}
+                                                className="bg-yellow-100 text-yellow-800 hover:bg-yellow-400 hover:text-yellow-900 px-3 py-1.5 rounded-lg text-xs font-bold transition disabled:opacity-50"
+                                            >
+                                                👑 Set Winner
+                                            </button>
+                                        )}
+                                        {isAdmin && evt.winner?.id === reg.id && (
+                                            <span className="text-yellow-600 font-bold text-sm">🏆 Winner</span>
+                                        )}
                                     </div>
                                 </li>
                             ))}

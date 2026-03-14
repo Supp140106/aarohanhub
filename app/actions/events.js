@@ -25,7 +25,7 @@ export async function fetchEvents(userId = null) {
         return await db.select().from(events);
     }
 
-    // Join events with registrations for the specific user
+    // Join events with registrations for the specific user and with users for winner info
     const results = await db
         .select({
             id: events.id,
@@ -33,16 +33,28 @@ export async function fetchEvents(userId = null) {
             description: events.description,
             schedule: events.schedule,
             isRegistered: registrations.id,
+            winnerId: events.winnerId,
+            winnerName: users.fullName,
+            winnerEmail: users.email,
         })
         .from(events)
+        .leftJoin(users, eq(events.winnerId, users.id))
         .leftJoin(
             registrations,
             and(eq(registrations.eventId, events.id), eq(registrations.userId, userId))
         );
 
     return results.map(r => ({
-        ...r,
-        isRegistered: !!r.isRegistered
+        id: r.id,
+        title: r.title,
+        description: r.description,
+        schedule: r.schedule,
+        isRegistered: !!r.isRegistered,
+        winner: r.winnerId ? {
+            id: r.winnerId,
+            name: r.winnerName,
+            email: r.winnerEmail
+        } : null
     }));
 }
 
@@ -158,4 +170,35 @@ export async function fetchEventRegistrations(eventId) {
         .where(eq(registrations.eventId, Number(eventId)));
 
     return results;
+}
+
+export async function setEventWinner(formData) {
+    if (!(await verifyAdmin())) return { error: "Unauthorized" };
+
+    const eventId = formData.get('eventId');
+    const winnerId = formData.get('winnerId');
+
+    if (!eventId || !winnerId) {
+        return { error: 'Event ID and Winner ID are required' };
+    }
+
+    try {
+        await db.update(events).set({ winnerId: Number(winnerId) }).where(eq(events.id, Number(eventId)));
+        revalidatePath('/events');
+        return { success: true };
+    } catch (e) {
+        return { error: 'Failed to set event winner' };
+    }
+}
+
+export async function checkIfWinner(userId) {
+    if (!userId) return false;
+
+    try {
+        const winningEvents = await db.select().from(events).where(eq(events.winnerId, userId));
+        return winningEvents.length > 0;
+    } catch (error) {
+        console.error("Error checking winner status:", error);
+        return false;
+    }
 }
