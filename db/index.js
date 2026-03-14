@@ -1,0 +1,7 @@
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
+import * as schema from "./schema.js";
+
+// Disable prefetch/prepare if using Supabase connection pooling (port 6543)
+const client = postgres(process.env.DATABASE_URL, { prepare: false });
+export const db = drizzle(client, { schema });
