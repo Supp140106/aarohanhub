@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getLogistics, updateLogistics } from '@/app/actions/logistics';
 import { toast } from 'sonner';
+import { X, MapPin, Coffee, Shield, Save, Truck, Info } from 'lucide-react';
 
 export default function LogisticsModal({ user, onClose }) {
     const [loading, setLoading] = useState(true);
@@ -31,71 +32,94 @@ export default function LogisticsModal({ user, onClose }) {
         const res = await updateLogistics(user.id, details);
         setSaving(false);
         if (res.success) {
-            toast.success('Logistics updated successfully!');
+            toast.success('Logistics intel updated.');
             onClose();
         } else {
-            toast.error(res.error || 'Failed to update logistics.');
+            toast.error(res.error || 'Sync failed.');
         }
     }
 
     return (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 transform transition-all animate-in fade-in zoom-in duration-200">
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900 leading-tight">
-                        Manage Logistics<br />
-                        <span className="text-sm font-medium text-purple-600">for {user.fullName}</span>
-                    </h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition p-2 hover:bg-gray-100 rounded-full">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[200] p-4 animate-in fade-in duration-300">
+            <div className="card-glass max-w-lg w-full p-0 overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.7)] border-white/10">
+                {/* Header */}
+                <div className="p-8 border-b border-white/10 bg-gradient-to-r from-[#7000FF]/10 to-transparent">
+                    <div className="flex justify-between items-start">
+                        <div className="flex items-center gap-4">
+                            <div className="w-14 h-14 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-center text-[#7000FF] shadow-inner">
+                                <Truck className="w-7 h-7" />
+                            </div>
+                            <div>
+                                <h2 className="text-2xl font-black text-white tracking-tighter uppercase leading-none">DEPLOYMENT <span className="gradient-text">INTEL</span></h2>
+                                <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mt-2 flex items-center gap-2">
+                                    <Info className="w-3 h-3 text-[#00F0FF]" />
+                                    UPDATING STATUS FOR: {user.fullName}
+                                </p>
+                            </div>
+                        </div>
+                        <button onClick={onClose} className="p-3 rounded-xl bg-white/5 text-gray-500 hover:text-white hover:bg-white/10 transition-all">
+                            <X className="w-6 h-6" />
+                        </button>
+                    </div>
                 </div>
 
                 {loading ? (
-                    <div className="py-12 flex flex-col items-center justify-center space-y-4">
-                        <div className="w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
-                        <p className="text-gray-500 font-medium animate-pulse">Fetching details...</p>
+                    <div className="py-24 flex flex-col items-center justify-center space-y-6">
+                        <div className="w-12 h-12 border-4 border-[#00F0FF] border-t-transparent rounded-full animate-spin shadow-[0_0_20px_rgba(0,240,255,0.2)]"></div>
+                        <p className="text-gray-500 font-black text-[10px] uppercase tracking-[0.3em] animate-pulse">Synchronizing Data Pulse...</p>
                     </div>
                 ) : (
-                    <div className="space-y-6">
-                        <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Accommodation Details</label>
+                    <div className="p-8 space-y-10 animate-in slide-in-from-bottom-2 duration-500">
+                        {/* Accommodation */}
+                        <div className="space-y-4">
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] flex items-center gap-2">
+                                <MapPin className="w-3 h-3 text-[#7000FF]" />
+                                Base Camp Assignment
+                            </label>
                             <textarea
                                 value={details.accommodationDetails}
                                 onChange={(e) => setDetails({ ...details, accommodationDetails: e.target.value })}
-                                className="w-full p-4 rounded-xl border-2 border-gray-100 focus:border-purple-500 focus:ring-0 transition-all min-h-[120px] text-gray-700 bg-gray-50"
-                                placeholder="Enter hotel name, room number, or special instructions..."
+                                className="w-full p-6 rounded-2xl bg-white/5 border border-white/10 focus:border-[#00F0FF]/50 focus:ring-0 transition-all min-h-[140px] text-xs font-mono text-gray-300 placeholder:text-gray-700 outline-none"
+                                placeholder="Enter coordinates, sector details, or mission directives..."
                             />
                         </div>
 
-                        <div className="flex items-center justify-between p-4 bg-purple-50 rounded-xl border-2 border-purple-100">
-                            <div>
-                                <p className="font-bold text-purple-900">Food Coupon Status</p>
-                                <p className="text-xs text-purple-700">Toggle if coupons are provided</p>
+                        {/* Sustenance Toggle */}
+                        <div className={`p-6 rounded-2xl border transition-all flex items-center justify-between ${details.foodCouponProvided ? 'bg-[#39FF14]/5 border-[#39FF14]/20' : 'bg-white/5 border-white/10'}`}>
+                            <div className="flex items-center gap-4">
+                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${details.foodCouponProvided ? 'border-[#39FF14]/30 bg-[#39FF14]/10 text-[#39FF14]' : 'border-white/10 bg-white/5 text-gray-700'}`}>
+                                    <Coffee className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <p className={`text-sm font-black uppercase tracking-tight ${details.foodCouponProvided ? 'text-[#39FF14]' : 'text-gray-400'}`}>
+                                        Sustenance Passes
+                                    </p>
+                                    <p className="text-[10px] text-gray-600 font-bold uppercase tracking-widest leading-none mt-1">Operational fuel vouchers</p>
+                                </div>
                             </div>
                             <button
                                 onClick={() => setDetails({ ...details, foodCouponProvided: !details.foodCouponProvided })}
-                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${details.foodCouponProvided ? 'bg-purple-600' : 'bg-gray-300'}`}
+                                className={`relative inline-flex h-8 w-14 items-center rounded-xl transition-all outline-none border ${details.foodCouponProvided ? 'bg-[#39FF14] border-black/20 shadow-[0_0_15px_rgba(57,255,20,0.3)]' : 'bg-black/60 border-white/10'}`}
                             >
-                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${details.foodCouponProvided ? 'translate-x-6' : 'translate-x-1'}`} />
+                                <span className={`inline-block h-5 w-5 transform rounded-lg transition-transform duration-300 shadow-md ${details.foodCouponProvided ? 'translate-x-7 bg-white' : 'translate-x-1.5 bg-gray-600'}`} />
                             </button>
                         </div>
 
-                        <div className="flex gap-3">
+                        {/* Action Buttons */}
+                        <div className="flex gap-4 pt-4">
                             <button
                                 onClick={onClose}
-                                className="flex-1 py-3.5 px-6 rounded-xl border-2 border-gray-100 text-gray-600 font-bold hover:bg-gray-50 transition-all uppercase text-xs tracking-widest"
+                                className="flex-1 py-5 rounded-xl border border-white/10 text-gray-500 font-black uppercase text-xs tracking-widest hover:text-white hover:bg-white/5 transition-all"
                             >
-                                Cancel
+                                Abort
                             </button>
                             <button
                                 onClick={handleSave}
                                 disabled={saving}
-                                className="flex-1 py-3.5 px-6 rounded-xl bg-purple-600 text-white font-bold hover:bg-purple-700 shadow-lg shadow-purple-200 transition-all transform hover:-translate-y-0.5 active:translate-y-0 uppercase text-xs tracking-widest disabled:opacity-50"
+                                className="flex-1 py-5 rounded-xl bg-[#00F0FF] text-black font-black uppercase text-xs tracking-widest hover:bg-[#00C2CC] shadow-[0_0_20px_rgba(0,240,255,0.2)] transition-all transform hover:-translate-y-1 active:translate-y-0 disabled:opacity-30 flex items-center justify-center gap-2"
                             >
-                                {saving ? 'Saving...' : 'Save Logistics'}
+                                <Save className="w-4 h-4" />
+                                {saving ? 'UPLOADING...' : 'COMMIT INTEL'}
                             </button>
                         </div>
                     </div>

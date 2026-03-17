@@ -3,14 +3,12 @@
 import { useState } from 'react';
 import { deleteEvent, registerForEvent, fetchEventRegistrations, setEventWinner } from '@/app/actions/events';
 import { toast } from 'sonner';
+import { Calendar, Trash2, CheckCircle, Users, Trophy, AlertCircle, Clock, ChevronDown, ChevronUp, Zap, Target, ShieldAlert, X } from 'lucide-react';
 
 export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
     const [loading, setLoading] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-    const [message, setMessage] = useState('');
-
-    // Admin specific states
     const [showRegistrations, setShowRegistrations] = useState(false);
     const [registrations, setRegistrations] = useState([]);
     const [loadingRegs, setLoadingRegs] = useState(false);
@@ -18,20 +16,18 @@ export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
 
     async function handleRegister() {
         setLoading(true);
-        setMessage('');
-
         const formData = new FormData();
         formData.append('eventId', evt.id);
 
         const res = await registerForEvent(formData);
 
         if (res?.error) {
-            setMessage(res.error);
+            toast.error(res.error);
         } else {
-            setMessage('Successfully Registered!');
+            toast.success('LINK_ESTABLISHED: Mission secure.');
             setShowConfirm(false);
+            evt.isRegistered = true;
         }
-
         setLoading(false);
     }
 
@@ -56,159 +52,212 @@ export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
         if (res?.error) {
             toast.error(res.error);
         } else {
-            toast.success('Winner successfully selected! 🎉');
+            toast.success('CHAMPION_AUTHENTICATED: Victory logged.');
         }
         setSettingWinner(false);
     }
 
+    const formattedDate = evt.schedule ? new Date(evt.schedule).toLocaleString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit'
+    }) : 'TBA';
+
     return (
-        <div className={`bg-white p-6 rounded-2xl shadow-sm border hover:shadow-md transition relative overflow-hidden ${evt.winner ? 'border-yellow-400 border-2' : 'border-gray-100'}`}>
-            {evt.winner && (
-                <div className="absolute top-0 right-0 bg-gradient-to-l from-yellow-400 to-yellow-300 text-yellow-900 text-xs font-black uppercase tracking-wider px-4 py-1.5 rounded-bl-xl shadow-sm flex items-center gap-1.5">
-                    <span>🏆</span> Current Winner
+        <div className={`group relative card-glass p-0 flex flex-col h-full border-white/5 hover:border-[#00F0FF]/30 transition-all duration-700 overflow-hidden ${evt.winner ? 'shadow-[0_0_50px_rgba(234,179,8,0.15)] border-yellow-500/30' : 'shadow-2xl'}`}>
+            {/* Background Accent Grid */}
+            <div className="absolute inset-0 grid-bg opacity-[0.03] group-hover:opacity-[0.08] transition-opacity pointer-events-none"></div>
+
+            {/* Header Badge */}
+            {evt.winner ? (
+                <div className="bg-yellow-500 text-black text-[9px] font-black uppercase tracking-[0.4em] py-3 px-6 flex items-center justify-center gap-3 italic">
+                    <Trophy className="w-4 h-4 fill-current" />
+                    BATTLE_CONCLUDED: CHAMPION_IDENTIFIED
+                </div>
+            ) : (
+                <div className="bg-[#00F0FF]/5 text-[#00F0FF] text-[9px] font-black uppercase tracking-[0.4em] py-3 px-6 flex items-center justify-between border-b border-white/5">
+                    <div className="flex items-center gap-2">
+                       <div className="w-1.5 h-1.5 rounded-full bg-[#00F0FF] animate-pulse"></div>
+                       MISSION_ACTIVE
+                    </div>
+                    <span>ID: #{evt.id}</span>
                 </div>
             )}
 
-            <div className="flex justify-between items-start mb-4 mt-2">
-
-                <h2 className="text-2xl font-bold text-gray-800">{evt.title}</h2>
-                {isAdmin && (
+            <div className="p-10 flex-1 flex flex-col relative z-10">
+                <div className="flex justify-between items-start mb-8">
                     <div>
-                        {!showDeleteConfirm ? (
-                            <button
-                                onClick={() => setShowDeleteConfirm(true)}
-                                className="text-sm bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1 rounded-md font-medium transition cursor-pointer"
-                            >
-                                Delete
-                            </button>
-                        ) : (
-                            <div className="flex items-center space-x-2">
-                                <span className="text-xs text-red-600 font-bold italic">Confirm?</span>
-                                <form action={deleteEvent}>
-                                    <input type="hidden" name="id" value={evt.id} />
-                                    <button type="submit" className="text-xs bg-red-600 text-white px-2 py-1 rounded font-bold hover:bg-red-700">Yes</button>
-                                </form>
+                       <h2 className="text-3xl font-black text-white tracking-tighter group-hover:text-[#00F0FF] transition-colors leading-none mb-2 uppercase italic">{evt.title}</h2>
+                       <div className="flex items-center gap-3 text-[10px] font-bold text-gray-600 tracking-widest uppercase">
+                          <Target className="w-3 h-3" /> sector_7a
+                          <span className="w-1 h-1 rounded-full bg-gray-800"></span>
+                          class_high_risk
+                       </div>
+                    </div>
+                    
+                    {isAdmin && (
+                        <div className="flex items-center gap-2">
+                            {showDeleteConfirm ? (
+                                <div className="flex gap-2 animate-in slide-in-from-right-2">
+                                    <form action={deleteEvent}>
+                                        <input type="hidden" name="id" value={evt.id} />
+                                        <button type="submit" className="bg-red-500 text-white p-3 rounded-xl hover:bg-red-600 transition-all shadow-lg">
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </form>
+                                    <button 
+                                      onClick={() => setShowDeleteConfirm(false)}
+                                      className="bg-white/10 text-white p-3 rounded-xl hover:bg-white/20 transition-all"
+                                    >
+                                       <X className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            ) : (
                                 <button
-                                    onClick={() => setShowDeleteConfirm(false)}
-                                    className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded font-bold hover:bg-gray-300"
+                                    onClick={() => setShowDeleteConfirm(true)}
+                                    className="text-gray-600 hover:text-red-500 p-3 rounded-xl hover:bg-red-500/10 transition-all border border-transparent hover:border-red-500/20"
                                 >
-                                    No
+                                    <Trash2 className="w-5 h-5" />
                                 </button>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                <p className="text-gray-400 font-medium mb-10 leading-relaxed border-l-2 border-white/10 pl-6 italic">
+                   "{evt.description || 'No additional mission intelligence provided.'}"
+                </p>
+
+                {evt.winner && (
+                    <div className="mb-10 p-6 rounded-2xl border border-yellow-500/20 bg-yellow-500/5 flex items-center gap-6 animate-in slide-in-from-bottom-4">
+                        <div className="w-14 h-14 rounded-2xl bg-yellow-500 flex items-center justify-center text-black shadow-[0_0_30px_rgba(234,179,8,0.3)] shrink-0">
+                            <Trophy className="w-7 h-7 fill-current" />
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-[10px] font-black text-yellow-500/60 uppercase tracking-[0.3em] mb-1">Confirmed Victor</p>
+                            <p className="text-xl font-black text-white truncate">{evt.winner.name}</p>
+                        </div>
+                    </div>
+                )}
+
+                <div className="mt-auto space-y-8">
+                    <div className="flex flex-wrap gap-4">
+                        <div className="flex items-center gap-3 px-5 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-[10px] font-black tracking-widest uppercase italic">
+                            <Clock className="w-4 h-4 text-[#00F0FF]" />
+                            {formattedDate}
+                        </div>
+                        {evt.isRegistered && (
+                            <div className="flex items-center gap-3 px-5 py-3 rounded-xl bg-[#39FF14]/10 border border-[#39FF14]/20 text-[#39FF14] text-[10px] font-black tracking-widest uppercase italic shadow-[0_0_20px_rgba(57,255,20,0.1)]">
+                                <CheckCircle className="w-4 h-4" />
+                                LINK_ESTABLISHED
                             </div>
                         )}
                     </div>
-                )}
-            </div>
 
-            <p className="text-gray-600 mb-6 leading-relaxed">{evt.description}</p>
-
-            {evt.winner && (
-                <div className="mb-6 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 p-4 rounded-xl flex items-center gap-4">
-                    <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center shadow-inner text-2xl">
-                        👑
-                    </div>
-                    <div>
-                        <h4 className="text-sm font-bold text-yellow-800 uppercase tracking-widest mb-0.5">Winner</h4>
-                        <p className="text-lg font-black text-gray-900">{evt.winner.name}</p>
-                        <p className="text-xs font-medium text-gray-500">{evt.winner.email}</p>
-                    </div>
-                </div>
-            )}
-
-            {message && (
-                <div className={`mb-4 p-3 rounded-lg text-sm font-medium ${message.includes('Success') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                    {message}
-                </div>
-            )}
-
-            <div className="flex flex-wrap items-center justify-between gap-4 border-t pt-4">
-                <span className="inline-flex items-center text-sm font-medium text-gray-500 bg-gray-50 px-3 py-1 rounded-full border">
-                    📅 {evt.schedule ? new Date(evt.schedule).toLocaleString() : 'TBA'}
-                </span>
-
-                {isStaff ? (
-                    <button
-                        onClick={handleViewRegistrations}
-                        className="bg-purple-100 text-purple-700 hover:bg-purple-200 font-semibold py-2 px-4 rounded-lg transition text-sm"
-                    >
-                        {showRegistrations ? 'Hide Registrations' : 'View Registrations'}
-                    </button>
-                ) : (
-                    <div>
-                        {evt.isRegistered ? (
-                            <div className="flex items-center space-x-2">
-                                <span className="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-bold text-sm border border-green-200 flex items-center">
-                                    <span className="mr-2">✅</span> Registered
-                                </span>
-                            </div>
-                        ) : (!showConfirm && userRole !== 'volunteer') ? (
+                    <div className="flex gap-4">
+                        {isStaff && (
                             <button
-                                onClick={() => setShowConfirm(true)}
-                                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition transform hover:-translate-y-0.5 shadow-sm"
+                                onClick={handleViewRegistrations}
+                                className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black h-16 rounded-2xl transition-all text-[10px] tracking-[0.3em] uppercase flex items-center justify-center gap-3 italic"
                             >
-                                Register
+                                <Users className="w-4 h-4" />
+                                {showRegistrations ? "CLOSE_INTEL" : "VIEW_INTEL"}
+                                {showRegistrations ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                             </button>
-                        ) : userRole === 'volunteer' ? (
-                            <span className="text-sm text-gray-400 italic font-medium bg-gray-50 px-3 py-1.5 rounded-lg border">
-                                Staff Account
-                            </span>
-                        ) : (
-                            <div className="flex items-center space-x-2">
-                                <span className="text-sm text-gray-600 font-medium">Are you sure?</span>
-                                <button
-                                    onClick={handleRegister}
-                                    disabled={loading}
-                                    className="bg-green-500 hover:bg-green-600 text-white font-semibold py-1.5 px-4 rounded-lg transition disabled:opacity-50 text-sm"
-                                >
-                                    {loading ? '...' : 'Yes, Confirm'}
-                                </button>
-                                <button
-                                    onClick={() => setShowConfirm(false)}
-                                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-1.5 px-4 rounded-lg transition text-sm"
-                                >
-                                    Cancel
-                                </button>
-                            </div>
                         )}
-                    </div>
-                )}
-            </div>
-
-            {/* Staff Registrations Panel */}
-            {isStaff && showRegistrations && (
-                <div className="mt-4 bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <h4 className="font-bold text-gray-800 mb-2">Registered Users ({registrations.length})</h4>
-                    {loadingRegs ? (
-                        <p className="text-sm text-gray-500">Loading...</p>
-                    ) : registrations.length === 0 ? (
-                        <p className="text-sm text-gray-500">No one has registered for this event yet.</p>
-                    ) : (
-                        <ul className="space-y-2 mt-3 max-h-60 overflow-y-auto">
-                            {registrations.map(reg => (
-                                <li key={reg.id} className="text-sm flex justify-between bg-white p-2 rounded border shadow-sm">
-                                    <div>
-                                        <p className="font-medium text-gray-800">{reg.fullName}</p>
-                                        <p className="text-gray-500 text-xs">{reg.email}</p>
+                        {!isStaff && (
+                            <div className="w-full">
+                                {evt.winner ? (
+                                    <div className="w-full text-center p-5 border border-white/5 rounded-2xl text-gray-700 font-bold text-[10px] uppercase tracking-[0.5em] italic">
+                                        OPERATION_ARCHIVED
                                     </div>
-                                    <div className="text-right flex items-center gap-3">
-                                        <div className="text-right">
-                                            <span className={`text-xs px-2 py-1 rounded-full font-medium ${reg.role === 'student' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
-                                                {reg.role}
-                                            </span>
-                                            {reg.isVolunteer && <span className="block text-xs text-green-600 mt-1 font-bold">Volunteer</span>}
-                                        </div>
+                                ) : evt.isRegistered ? (
+                                    <div className="w-full bg-[#00F0FF]/10 text-[#00F0FF] border border-[#00F0FF]/20 font-black h-16 rounded-2xl text-[10px] tracking-[0.3em] uppercase text-center flex items-center justify-center gap-3 cursor-default italic">
+                                        <CheckCircle className="w-5 h-5" />
+                                        MISSION_SECURED
+                                    </div>
+                                ) : showConfirm ? (
+                                    <div className="flex gap-3 animate-in fade-in zoom-in-95 w-full">
+                                        <button
+                                            onClick={handleRegister}
+                                            disabled={loading}
+                                            className="flex-1 bg-[#00F0FF] text-black font-black h-16 rounded-2xl transition-all text-[10px] tracking-[0.3em] uppercase hover:bg-[#00DDEB] shadow-[0_10px_30px_rgba(0,240,255,0.3)] italic"
+                                        >
+                                            {loading ? "INITIALIZING..." : "CONFIRM_ENROLLMENT"}
+                                        </button>
+                                        <button
+                                            onClick={() => setShowConfirm(false)}
+                                            className="w-16 bg-white/5 text-gray-500 font-black h-16 rounded-2xl hover:bg-white/10 hover:text-white transition-all border border-white/5 flex items-center justify-center"
+                                        >
+                                            <X className="w-5 h-5" />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={() => setShowConfirm(true)}
+                                        disabled={userRole === 'volunteer'}
+                                        className="w-full bg-[#00F0FF] text-black font-black h-16 rounded-2xl text-[11px] tracking-[0.3em] uppercase disabled:opacity-30 disabled:grayscale transition-all hover:scale-[1.02] active:scale-[0.98] shadow-[0_10px_40px_rgba(0,240,255,0.2)] flex items-center justify-center gap-3 italic"
+                                    >
+                                        <Zap className="w-5 h-5 fill-current" />
+                                        ENLIST_IN_MISSION
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Admin/Staff Expandable Intel Section */}
+            {isStaff && showRegistrations && (
+                <div className="px-10 pb-10 animate-in slide-in-from-top-4 border-t border-white/5 pt-10 bg-black/60 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
+                       <Users className="w-32 h-32" />
+                    </div>
+                    <div className="flex items-center justify-between mb-8">
+                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.5em] italic flex items-center gap-2">
+                           <div className="w-8 h-[1px] bg-gray-800"></div>
+                           Personnel_Log ({registrations.length})
+                        </h4>
+                    </div>
+                    {loadingRegs ? (
+                        <div className="flex flex-col items-center justify-center py-12 gap-4">
+                            <div className="w-8 h-8 border-2 border-[#00F0FF] border-t-transparent rounded-full animate-spin"></div>
+                            <span className="text-[9px] font-black text-gray-600 uppercase tracking-widest">Compiling Intel...</span>
+                        </div>
+                    ) : registrations.length === 0 ? (
+                        <div className="flex flex-col items-center py-12 text-gray-700 gap-4 border border-dashed border-white/5 rounded-2xl">
+                            <ShieldAlert className="w-10 h-10 opacity-20" />
+                            <p className="text-[10px] font-black italic tracking-widest uppercase">ZERO_REGISTRATIONS_DETECTION</p>
+                        </div>
+                    ) : (
+                        <ul className="space-y-4 max-h-80 overflow-y-auto pr-4 custom-scrollbar">
+                            {registrations.map(reg => (
+                                <li key={reg.id} className="group/item flex items-center justify-between bg-white/[0.03] p-5 rounded-2xl border border-white/5 hover:border-[#00F0FF]/30 hover:bg-[#00F0FF]/5 transition-all">
+                                    <div className="min-w-0 pr-4">
+                                        <p className="font-black text-white text-sm truncate uppercase tracking-tight">{reg.fullName}</p>
+                                        <p className="text-[9px] text-gray-500 font-mono tracking-tighter truncate mt-1 italic">{reg.email}</p>
+                                    </div>
+                                    <div className="flex items-center gap-4 shrink-0">
                                         {isAdmin && !evt.winner && (
                                             <button
                                                 onClick={() => handleSetWinner(reg.id)}
                                                 disabled={settingWinner}
-                                                className="bg-yellow-100 text-yellow-800 hover:bg-yellow-400 hover:text-yellow-900 px-3 py-1.5 rounded-lg text-xs font-bold transition disabled:opacity-50"
+                                                className="bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500 hover:text-black w-10 h-10 rounded-xl transition-all flex items-center justify-center border border-yellow-500/20 group-hover/item:scale-110 shadow-lg"
+                                                title="Authenticate Victory"
                                             >
-                                                👑 Set Winner
+                                                <Trophy className="w-5 h-5" />
                                             </button>
                                         )}
                                         {isAdmin && evt.winner?.id === reg.id && (
-                                            <span className="text-yellow-600 font-bold text-sm">🏆 Winner</span>
+                                            <div className="text-yellow-500 bg-yellow-500/10 w-10 h-10 rounded-xl flex items-center justify-center border border-yellow-500/20">
+                                                <Trophy className="w-5 h-5 fill-current" />
+                                            </div>
                                         )}
+                                        <div className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-[0.2em] shadow-sm ${reg.role === 'student' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-orange-500/20 text-orange-400 border border-orange-500/30'}`}>
+                                            {reg.role}
+                                        </div>
                                     </div>
                                 </li>
                             ))}

@@ -17,6 +17,8 @@ export const users = pgTable("users", {
   role: text("role")
     .$type("external" | "student" | "volunteer" | "organizer" | "dba")
     .default("external"),
+  phone: varchar("phone", { length: 20 }),
+  college: varchar("college", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
