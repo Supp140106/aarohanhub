@@ -2,7 +2,7 @@
 
 import { db } from '@/db';
 import { queries, users } from '@/db/schema';
-import { eq, or, and, isNotNull, desc } from 'drizzle-orm';
+import { eq, or, and, isNotNull, isNull, desc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 
@@ -100,7 +100,21 @@ export async function fetchSupportQueries() {
 
         return results;
     } catch (e) {
-        console.error("Fetch Queries Error:", e);
+        console.error("Fetch Support Queries Error:", e);
+        // Log detailed database error if available
+        if (e.message) console.error("DB Error Message:", e.message);
         return [];
+    }
+}
+
+export async function getUnansweredQueryCount() {
+    try {
+        const results = await db.select()
+            .from(queries)
+            .where(isNull(queries.answer));
+        return results.length;
+    } catch (e) {
+        console.error("Fetch Unanswered Query Count Error:", e);
+        return 0;
     }
 }

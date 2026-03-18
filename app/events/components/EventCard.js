@@ -73,7 +73,7 @@ export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
 
     return (
         <div className={`bg-white/[0.03] rounded-3xl border overflow-hidden transition-all hover:border-white/20 group ${evt.winner ? 'border-yellow-500/40' : 'border-white/10'}`}>
-            
+
             {/* Winner Badge */}
             {evt.winner && (
                 <div className="bg-yellow-500/10 border-b border-yellow-500/20 px-6 py-2 flex items-center gap-2">

@@ -1,8 +1,22 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 
 export default function TechGrid() {
+    const [particles, setParticles] = useState([]);
+
+    useEffect(() => {
+        // Generate random particle data only on the client
+        const newParticles = [...Array(5)].map((_, i) => ({
+            id: i,
+            x: Math.random() * 100 + '%',
+            duration: Math.random() * 5 + 5,
+            delay: Math.random() * 10,
+        }));
+        setParticles(newParticles);
+    }, []);
+
     return (
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
             {/* Perspective Grid Line */}
@@ -35,12 +49,12 @@ export default function TechGrid() {
             </div>
 
             {/* Glowing Orbs / Data Nodes */}
-            {[...Array(5)].map((_, i) => (
+            {particles.map((p) => (
                 <motion.div
-                    key={i}
+                    key={p.id}
                     className="absolute w-1 h-1 bg-[#00F0FF] rounded-full blur-[2px] shadow-[0_0_8px_#00F0FF]"
                     initial={{ 
-                        x: Math.random() * 100 + '%', 
+                        x: p.x, 
                         y: '110%',
                         opacity: 0 
                     }}
@@ -49,9 +63,9 @@ export default function TechGrid() {
                         opacity: [0, 1, 1, 0]
                     }}
                     transition={{
-                        duration: Math.random() * 5 + 5,
+                        duration: p.duration,
                         repeat: Infinity,
-                        delay: Math.random() * 10,
+                        delay: p.delay,
                         ease: "linear"
                     }}
                 />
