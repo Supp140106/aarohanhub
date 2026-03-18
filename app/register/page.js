@@ -63,12 +63,12 @@ export default function RegisterPage() {
 
     return (
         <div className="h-screen overflow-hidden flex flex-col items-center justify-center bg-[#0a0a0a] text-white p-4 relative font-sans">
-            
+
             <Link href="/" className="absolute top-8 left-8 text-gray-500 hover:text-white transition-colors font-bold tracking-widest uppercase text-sm flex items-center gap-2">
                 <ArrowLeft className="w-4 h-4" /> Back to HQ
             </Link>
 
-            <motion.div 
+            <motion.div
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: 'easeOut' }}
@@ -88,121 +88,121 @@ export default function RegisterPage() {
                 )}
 
                 <AnimatePresence mode="wait">
-                {step === 1 ? (
-                    <motion.form 
-                        key="step1"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        action={handleRegister} 
-                        className="space-y-6"
-                    >
-                        <div>
-                            <input
-                                type="text"
-                                id="fullName"
-                                name="fullName"
-                                required
-                                className="w-full px-6 py-4 bg-transparent border-b-2 border-white/20 focus:border-[#00F0FF] outline-none transition-colors text-white text-lg rounded-none placeholder:text-white/20 uppercase font-medium tracking-wider"
-                                placeholder="Full Name"
-                            />
-                        </div>
+                    {step === 1 ? (
+                        <motion.form
+                            key="step1"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            action={handleRegister}
+                            className="space-y-6"
+                        >
+                            <div>
+                                <input
+                                    type="text"
+                                    id="fullName"
+                                    name="fullName"
+                                    required
+                                    className="w-full px-6 py-4 bg-transparent border-b-2 border-white/20 focus:border-[#00F0FF] outline-none transition-colors text-white text-lg rounded-none placeholder:text-white/20 uppercase font-medium tracking-wider"
+                                    placeholder="Full Name"
+                                />
+                            </div>
 
-                        <div>
-                            <input
-                                type="email"
-                                id="email"
-                                name="email"
-                                required
-                                className="w-full px-6 py-4 bg-transparent border-b-2 border-white/20 focus:border-[#00F0FF] outline-none transition-colors text-white text-lg rounded-none placeholder:text-white/20 uppercase font-medium tracking-wider"
-                                placeholder="Email Address"
-                            />
-                        </div>
+                            <div>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    required
+                                    className="w-full px-6 py-4 bg-transparent border-b-2 border-white/20 focus:border-[#00F0FF] outline-none transition-colors text-white text-lg rounded-none placeholder:text-white/20 uppercase font-medium tracking-wider"
+                                    placeholder="Email Address"
+                                />
+                            </div>
 
-                        <div>
-                            <input
-                                type="password"
-                                id="password"
-                                name="password"
-                                required
-                                className="w-full px-6 py-4 bg-transparent border-b-2 border-white/20 focus:border-[#00F0FF] outline-none transition-colors text-white text-lg rounded-none placeholder:text-white/20 uppercase font-medium tracking-wider"
-                                placeholder="Access Key (Password)"
-                            />
-                        </div>
+                            <div>
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    required
+                                    className="w-full px-6 py-4 bg-transparent border-b-2 border-white/20 focus:border-[#00F0FF] outline-none transition-colors text-white text-lg rounded-none placeholder:text-white/20 uppercase font-medium tracking-wider"
+                                    placeholder="Access Key (Password)"
+                                />
+                            </div>
 
-                        <div>
-                            <select
-                                id="role"
-                                name="role"
-                                required
-                                className="w-full px-6 py-4 bg-transparent border-b-2 border-white/20 focus:border-[#00F0FF] outline-none transition-colors text-white text-lg rounded-none uppercase font-medium tracking-wider appearance-none cursor-pointer"
+                            <div>
+                                <select
+                                    id="role"
+                                    name="role"
+                                    required
+                                    className="w-full px-6 py-4 bg-transparent border-b-2 border-white/20 focus:border-[#00F0FF] outline-none transition-colors text-white text-lg rounded-none uppercase font-medium tracking-wider appearance-none cursor-pointer"
+                                >
+                                    <option value="external" className="bg-[#0a0a0a] text-white">External Participant</option>
+                                    <option value="student" className="bg-[#0a0a0a] text-white">NIT Durgapur Student</option>
+                                    <option value="volunteer" className="bg-[#0a0a0a] text-white">Volunteer</option>
+
+                                </select>
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full mt-6 bg-white text-black font-black uppercase tracking-widest py-4 px-8 flex items-center justify-center gap-4 hover:bg-[#00F0FF] transition-colors disabled:opacity-50 group"
                             >
-                                <option value="external" className="bg-[#0a0a0a] text-white">External Participant</option>
-                                <option value="student" className="bg-[#0a0a0a] text-white">NIT Durgapur Student</option>
-                                <option value="volunteer" className="bg-[#0a0a0a] text-white">Volunteer</option>
-                                <option value="organizer" className="bg-[#0a0a0a] text-white">Organizer</option>
-                            </select>
-                        </div>
+                                {loading ? 'Transmitting Data...' : 'Request Validation OTP'}
+                                {!loading && <ArrowUpRight className="w-6 h-6 group-hover:rotate-45 transition-transform" />}
+                            </button>
 
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full mt-6 bg-white text-black font-black uppercase tracking-widest py-4 px-8 flex items-center justify-center gap-4 hover:bg-[#00F0FF] transition-colors disabled:opacity-50 group"
+                            <div className="text-center mt-6">
+                                <Link href="/login" className="text-sm text-gray-500 hover:text-white uppercase tracking-widest font-bold transition-colors pb-4">
+                                    Node Already Initialized? Login
+                                </Link>
+                            </div>
+                        </motion.form>
+                    ) : (
+                        <motion.form
+                            key="step2"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 20 }}
+                            action={handleVerify}
+                            className="space-y-8 text-center"
                         >
-                            {loading ? 'Transmitting Data...' : 'Request Validation OTP'}
-                            {!loading && <ArrowUpRight className="w-6 h-6 group-hover:rotate-45 transition-transform" /> }
-                        </button>
+                            <div>
+                                <p className="text-sm text-gray-400 mb-8 uppercase tracking-widest leading-loose">
+                                    Security Token Sent To<br /><span className="text-[#00F0FF] font-bold text-lg">{formDataCache.email}</span>
+                                </p>
 
-                        <div className="text-center mt-6">
-                            <Link href="/login" className="text-sm text-gray-500 hover:text-white uppercase tracking-widest font-bold transition-colors pb-4">
-                                Node Already Initialized? Login
-                            </Link>
-                        </div>
-                    </motion.form>
-                ) : (
-                    <motion.form 
-                        key="step2"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        action={handleVerify} 
-                        className="space-y-8 text-center"
-                    >
-                        <div>
-                            <p className="text-sm text-gray-400 mb-8 uppercase tracking-widest leading-loose">
-                                Security Token Sent To<br/><span className="text-[#00F0FF] font-bold text-lg">{formDataCache.email}</span>
-                            </p>
-                            
-                            <input
-                                type="text"
-                                id="token"
-                                name="token"
-                                required
-                                maxLength={6}
-                                pattern="\d{6}"
-                                className="w-full px-4 py-6 bg-transparent border border-white/20 focus:border-[#00F0FF] text-center tracking-[1em] text-4xl rounded-xl outline-none transition-colors text-white uppercase font-black"
-                                placeholder="------"
-                            />
-                        </div>
+                                <input
+                                    type="text"
+                                    id="token"
+                                    name="token"
+                                    required
+                                    maxLength={6}
+                                    pattern="\d{6}"
+                                    className="w-full px-4 py-6 bg-transparent border border-white/20 focus:border-[#00F0FF] text-center tracking-[1em] text-4xl rounded-xl outline-none transition-colors text-white uppercase font-black"
+                                    placeholder="------"
+                                />
+                            </div>
 
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full mt-10 bg-[#00F0FF] text-black font-black uppercase tracking-widest py-6 px-8 flex items-center justify-center gap-4 hover:bg-white transition-colors disabled:opacity-50 group"
-                        >
-                            {loading ? 'Verifying Integrity...' : 'Confirm Authentication'}
-                            {!loading && <ArrowUpRight className="w-6 h-6 group-hover:rotate-45 transition-transform" /> }
-                        </button>
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full mt-10 bg-[#00F0FF] text-black font-black uppercase tracking-widest py-6 px-8 flex items-center justify-center gap-4 hover:bg-white transition-colors disabled:opacity-50 group"
+                            >
+                                {loading ? 'Verifying Integrity...' : 'Confirm Authentication'}
+                                {!loading && <ArrowUpRight className="w-6 h-6 group-hover:rotate-45 transition-transform" />}
+                            </button>
 
-                        <button
-                            type="button"
-                            onClick={() => { setStep(1); setError(''); }}
-                            className="w-full text-xs text-gray-500 hover:text-white mt-8 tracking-widest uppercase font-bold transition-colors"
-                        >
-                            Abort Validation Sequence
-                        </button>
-                    </motion.form>
-                )}
+                            <button
+                                type="button"
+                                onClick={() => { setStep(1); setError(''); }}
+                                className="w-full text-xs text-gray-500 hover:text-white mt-8 tracking-widest uppercase font-bold transition-colors"
+                            >
+                                Abort Validation Sequence
+                            </button>
+                        </motion.form>
+                    )}
                 </AnimatePresence>
             </motion.div>
         </div>
