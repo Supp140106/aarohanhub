@@ -1,6 +1,20 @@
+'use client';
+
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 
 export default function NotFound() {
+    const [stars, setStars] = useState([]);
+
+    useEffect(() => {
+        setStars([...Array(20)].map(() => ({
+            top: `${Math.random() * 100}%`,
+            left: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random() * 5}s`,
+            animationDuration: `${2 + Math.random() * 3}s`
+        })));
+    }, []);
+
     return (
         <div className="min-h-screen bg-[#050B1B] flex flex-col items-center justify-center p-6 relative overflow-hidden">
             {/* Background elements */}
@@ -45,17 +59,12 @@ export default function NotFound() {
 
             {/* Floating stars effect */}
             <div className="absolute inset-0 pointer-events-none opacity-30">
-                {[...Array(20)].map((_, i) => (
+                {stars.map((style, i) => (
                     <div
                         key={i}
                         className="absolute w-1 h-1 bg-white rounded-full animate-ping"
-                        style={{
-                            top: `${Math.random() * 100}%`,
-                            left: `${Math.random() * 100}%`,
-                            animationDelay: `${Math.random() * 5}s`,
-                            animationDuration: `${2 + Math.random() * 3}s`
-                        }}
-                    ></div>
+                        style={style}
+                     ></div>
                 ))}
             </div>
         </div>

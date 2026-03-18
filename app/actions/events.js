@@ -21,41 +21,79 @@ async function verifyAdmin() {
 }
 
 export async function fetchEvents(userId = null) {
-    if (!userId) {
-        return await db.select().from(events);
+    try {
+        if (!userId) {
+            return (await db.select().from(events)).map(e => ({
+                ...e, isRegistered: false, winner: null
+            }));
+        }
+
+        // Try full query with winner info
+        const results = await db
+            .select({
+                id: events.id,
+                title: events.title,
+                description: events.description,
+                schedule: events.schedule,
+                isRegistered: registrations.id,
+                winnerId: events.winnerId,
+                winnerName: users.fullName,
+                winnerEmail: users.email,
+            })
+            .from(events)
+            .leftJoin(users, eq(events.winnerId, users.id))
+            .leftJoin(
+                registrations,
+                and(eq(registrations.eventId, events.id), eq(registrations.userId, userId))
+            );
+
+        return results.map(r => ({
+            id: r.id,
+            title: r.title,
+            description: r.description,
+            schedule: r.schedule,
+            isRegistered: !!r.isRegistered,
+            winner: r.winnerId ? {
+                id: r.winnerId,
+                name: r.winnerName,
+                email: r.winnerEmail
+            } : null
+        }));
+    } catch {
+        // Fallback: winner_id column may not exist yet — query without it
+        try {
+            if (!userId) {
+                return (await db.select().from(events)).map(e => ({
+                    ...e, isRegistered: false, winner: null
+                }));
+            }
+
+            const results = await db
+                .select({
+                    id: events.id,
+                    title: events.title,
+                    description: events.description,
+                    schedule: events.schedule,
+                    isRegistered: registrations.id,
+                })
+                .from(events)
+                .leftJoin(
+                    registrations,
+                    and(eq(registrations.eventId, events.id), eq(registrations.userId, userId))
+                );
+
+            return results.map(r => ({
+                id: r.id,
+                title: r.title,
+                description: r.description,
+                schedule: r.schedule,
+                isRegistered: !!r.isRegistered,
+                winner: null
+            }));
+        } catch {
+            return [];
+        }
     }
-
-    // Join events with registrations for the specific user and with users for winner info
-    const results = await db
-        .select({
-            id: events.id,
-            title: events.title,
-            description: events.description,
-            schedule: events.schedule,
-            isRegistered: registrations.id,
-            winnerId: events.winnerId,
-            winnerName: users.fullName,
-            winnerEmail: users.email,
-        })
-        .from(events)
-        .leftJoin(users, eq(events.winnerId, users.id))
-        .leftJoin(
-            registrations,
-            and(eq(registrations.eventId, events.id), eq(registrations.userId, userId))
-        );
-
-    return results.map(r => ({
-        id: r.id,
-        title: r.title,
-        description: r.description,
-        schedule: r.schedule,
-        isRegistered: !!r.isRegistered,
-        winner: r.winnerId ? {
-            id: r.winnerId,
-            name: r.winnerName,
-            email: r.winnerEmail
-        } : null
-    }));
 }
 
 export async function addEvent(formData) {
@@ -85,13 +123,22 @@ export async function addEvent(formData) {
 export async function deleteEvent(formData) {
     if (!(await verifyAdmin())) return { error: "Unauthorized" };
 
-    const id = formData.get('id');
+    const id = Number(formData.get('id'));
+    
+    if (!id) return { error: 'Invalid Event ID' };
+
     try {
-        await db.delete(events).where(eq(events.id, Number(id)));
+        // Step 1: Delete all registrations associated with this event to avoid Postgres Foreign Key Constraint Violation
+        await db.delete(registrations).where(eq(registrations.eventId, id));
+        
+        // Step 2: Delete the actual event
+        await db.delete(events).where(eq(events.id, id));
+        
         revalidatePath('/events');
         return { success: true };
     } catch (e) {
-        return { error: 'Failed to delete event' };
+        console.error("Event Deletion Error:", e);
+        return { error: 'Failed to delete event. Please check server logs.' };
     }
 }
 
@@ -195,10 +242,10 @@ export async function checkIfWinner(userId) {
     if (!userId) return false;
 
     try {
-        const winningEvents = await db.select().from(events).where(eq(events.winnerId, userId));
+        const winningEvents = await db.select({ id: events.id }).from(events).where(eq(events.winnerId, userId));
         return winningEvents.length > 0;
-    } catch (error) {
-        console.error("Error checking winner status:", error);
+    } catch {
+        // Column may not exist in the live database yet — fail gracefully
         return false;
     }
 }

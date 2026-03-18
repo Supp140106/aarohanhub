@@ -1,63 +1,175 @@
 import Link from 'next/link';
+import {ArrowUpRight} from 'lucide-react';
+import Navbar from '@/components/Navbar';
+import ScrollReveal from '@/components/ScrollReveal';
+import SplitText from '@/components/ReactBits/SplitText';
+import BlurText from '@/components/ReactBits/BlurText';
+import Marquee from '@/components/Marquee';
+import FloatingLines from '@/components/ReactBits/FloatingLines';
+import { cookies } from 'next/headers';
 
-export default function Home() {
+export default async function LandingPage() {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get('session');
+  let session = null;
+  if (sessionCookie) {
+      try {
+          session = JSON.parse(sessionCookie.value);
+      } catch (e) {
+          session = null;
+      }
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
-      {/* Navigation */}
-      <nav className="flex justify-between items-center py-6 px-8 bg-white shadow-sm">
-        <div className="text-2xl font-bold tracking-tight text-blue-700">Aarohan 2026</div>
-        <div className="space-x-4">
-          <Link href="/login" className="text-gray-600 font-medium hover:text-blue-600 transition">
-            Login
-          </Link>
-          <Link href="/register" className="bg-blue-600 text-white font-semibold py-2 px-5 rounded-full hover:bg-blue-700 transition shadow-md">
-            Register Now
-          </Link>
+    <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-white selection:text-black font-sans overflow-x-hidden">
+      <Navbar />
+      
+      {/* HERO SECTION */}
+      <section className="relative min-h-[90vh] flex flex-col justify-end pb-20 px-6 md:px-12 pt-40">
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <FloatingLines 
+            enabledWaves={["top","middle","bottom"]}
+            lineCount={5}
+            lineDistance={5}
+            bendRadius={5}
+            bendStrength={-0.5}
+            interactive={true}
+            parallax={true}
+          />
         </div>
-      </nav>
-
-      {/* Hero Section */}
-      <main className="flex flex-col items-center justify-center text-center px-4 pt-32 pb-20">
-        <div className="inline-block py-1 px-3 rounded-full bg-blue-100 text-blue-800 text-sm font-semibold mb-6">
-          The Annual Technical Festival
-        </div>
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-gray-900 mb-6 leading-tight">
-          Innovate. Create. <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Elevate.</span>
-        </h1>
-        <p className="max-w-2xl text-lg md:text-xl text-gray-600 mb-10">
-          Join the brightest minds from across the country for three days of intense competitions, groundbreaking workshops, and inspiring tech talks.
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Link href="/register" className="bg-blue-600 text-white font-semibold py-3 px-8 rounded-full hover:bg-blue-700 hover:shadow-lg transition transform hover:-translate-y-1">
-            Join as a Participant
-          </Link>
-          <Link href="/events" className="bg-white text-blue-700 border border-gray-200 font-semibold py-3 px-8 rounded-full hover:bg-gray-50 hover:shadow transition transform hover:-translate-y-1">
-            Browse Events
-          </Link>
-        </div>
-      </main>
-
-      {/* Features Section */}
-      <section className="bg-white py-24 px-8">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
-          <div className="p-6 rounded-2xl bg-gray-50 border border-gray-100">
-            <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center text-2xl mx-auto mb-4 font-bold">🚀</div>
-            <h3 className="text-xl font-bold mb-2">Hackathons</h3>
-            <p className="text-gray-600">Build incredible software in 24 hours and win exciting prizes.</p>
-          </div>
-          <div className="p-6 rounded-2xl bg-gray-50 border border-gray-100">
-            <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center text-2xl mx-auto mb-4 font-bold">🤖</div>
-            <h3 className="text-xl font-bold mb-2">Robotics</h3>
-            <p className="text-gray-600">Showcase your engineering skills in the ultimate robot combat arena.</p>
-          </div>
-          <div className="p-6 rounded-2xl bg-gray-50 border border-gray-100">
-            <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center text-2xl mx-auto mb-4 font-bold">💡</div>
-            <h3 className="text-xl font-bold mb-2">Workshops</h3>
-            <p className="text-gray-600">Learn directly from industry experts in hands-on technical sessions.</p>
-          </div>
+        <div className="max-w-7xl mx-auto w-full relative z-10 pointer-events-none">
+            <h1 className="text-[12vw] leading-[0.85] font-black tracking-tighter uppercase">
+                <div className="overflow-hidden"><SplitText text="WE BUILD" delay={30} className="block" /></div>
+                <div className="overflow-hidden text-[#00F0FF]"><SplitText text="TECHNICAL" delay={30} className="block" /></div>
+                <div className="overflow-hidden"><SplitText text="FESTIVALS" delay={30} className="block" /></div>
+            </h1>
+            
+            <div className="mt-20 flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
+                <BlurText 
+                    className="text-gray-400 font-medium text-xl md:text-3xl max-w-2xl leading-tight tracking-tight"
+                    text="NIT Durgapur's premier technical odyssey returns. An experience that turns students into innovators, and ideas into startups."
+                    delay={20} 
+                />
+                
+                <Link href={session ? "/dashboard" : "/login"} className="pointer-events-auto group flex items-center gap-4 bg-white text-black px-10 py-5 rounded-full font-bold uppercase tracking-wider hover:scale-105 transition-transform">
+                    <span>{session ? "Dashboard" : "Join The Arena"}</span>
+                    <ArrowUpRight className="w-6 h-6 group-hover:rotate-45 transition-transform" />
+                </Link>
+            </div>
+            
+            <div className="mt-24 grid grid-cols-2 md:grid-cols-4 gap-8 pt-10 border-t border-white/20">
+                {[
+                { label: "Active Participants", val: "5,000+" },
+                { label: "Core Events", val: "15+" },
+                { label: "Prize Pool", val: "₹500K" },
+                { label: "Founded", val: "2010" }
+                ].map((stat, i) => (
+                <div key={i} className="flex flex-col">
+                    <span className="text-sm text-gray-500 font-medium uppercase tracking-widest mb-2">{stat.label}</span>
+                    <span className="text-4xl font-bold">{stat.val}</span>
+                </div>
+                ))}
+            </div>
         </div>
       </section>
+
+      {/* MARQUEE */}
+      <Marquee 
+          items={["AAROHAN 2026", "INNOVATION", "TECHNOLOGY", "HACKATHONS", "ROBOTICS", "CODING"]} 
+          speed={40} 
+          className="mt-20"
+      />
+
+      {/* BENTO GRID PROJECTS/SERVICES */}
+      <section className="py-40 px-6 md:px-12 bg-white text-black">
+        <div className="max-w-7xl mx-auto">
+            <ScrollReveal>
+                <h2 className="text-6xl md:text-8xl font-black tracking-tighter uppercase mb-20 leading-none max-w-4xl">
+                    We design for <span className="text-[#00F0FF]">results</span> — pushing technical boundaries.
+                </h2>
+            </ScrollReveal>
+
+            <div className="grid grid-cols-1 md:grid-cols-12 auto-rows-[400px] gap-6">
+                {/* Large Card */}
+                <ScrollReveal delay={0.1} className="md:col-span-8 rounded-3xl bg-[#050505] text-white p-12 flex flex-col justify-between group overflow-hidden relative cursor-pointer">
+                    <div className="absolute inset-0 bg-[#00F0FF]/0 group-hover:bg-[#00F0FF]/10 transition-colors duration-500"></div>
+                    <div className="relative z-10">
+                        <span className="text-[#00F0FF] uppercase tracking-widest font-bold text-sm mb-4 block">01 / Flagship Events</span>
+                        <h3 className="text-5xl font-black tracking-tight uppercase leading-none">Technocracia</h3>
+                    </div>
+                    <div className="relative z-10 flex justify-between items-end">
+                        <p className="max-w-sm text-gray-400 text-lg">Engage in signature hackathons and engineering challenges.</p>
+                        <div className="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <ArrowUpRight className="w-8 h-8" />
+                        </div>
+                    </div>
+                </ScrollReveal>
+
+                {/* Medium Card */}
+                <ScrollReveal delay={0.2} className="md:col-span-4 rounded-3xl bg-gray-100 p-12 flex flex-col justify-between group cursor-pointer hover:bg-gray-200 transition-colors duration-500">
+                    <div>
+                        <span className="text-black/50 uppercase tracking-widest font-bold text-sm mb-4 block">02 / Network</span>
+                        <h3 className="text-4xl font-black tracking-tight uppercase leading-none">Global Nexus</h3>
+                    </div>
+                    <div>
+                        <p className="text-gray-600 text-lg mb-6">Connect with elite tech enthusiasts.</p>
+                        <ArrowUpRight className="w-10 h-10 text-black/50 group-hover:text-black transition-colors" />
+                    </div>
+                </ScrollReveal>
+
+                {/* Medium Card */}
+                <ScrollReveal delay={0.3} className="md:col-span-4 rounded-3xl bg-gray-100 p-12 flex flex-col justify-between group cursor-pointer hover:bg-gray-200 transition-colors duration-500">
+                    <div>
+                        <span className="text-black/50 uppercase tracking-widest font-bold text-sm mb-4 block">03 / Exclusives</span>
+                        <h3 className="text-4xl font-black tracking-tight uppercase leading-none">Legacy Vault</h3>
+                    </div>
+                    <div>
+                        <p className="text-gray-600 text-lg mb-6">Classified workshops for champions.</p>
+                        <ArrowUpRight className="w-10 h-10 text-black/50 group-hover:text-black transition-colors" />
+                    </div>
+                </ScrollReveal>
+
+                {/* Large Card */}
+                <ScrollReveal delay={0.4} className="md:col-span-8 rounded-3xl bg-[#00F0FF] text-black p-12 flex flex-col justify-between group cursor-pointer overflow-hidden relative">
+                    <div className="relative z-10">
+                        <span className="text-black/60 uppercase tracking-widest font-bold text-sm mb-4 block">04 / Platform</span>
+                        <h3 className="text-5xl font-black tracking-tight uppercase leading-none">Strategic Ops</h3>
+                    </div>
+                    <div className="relative z-10 flex justify-between items-end">
+                        <p className="max-w-sm text-black/80 text-lg font-medium">Real-time arena metrics, dynamic scoreboards, and seamless event coordination systems.</p>
+                        <div className="w-16 h-16 rounded-full bg-black text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <ArrowUpRight className="w-8 h-8" />
+                        </div>
+                    </div>
+                </ScrollReveal>
+            </div>
+        </div>
+      </section>
+
+      {/* LET'S TALK / CTA SECTION */}
+      <section className="min-h-screen flex flex-col bg-[#050505] relative overflow-hidden text-center justify-center items-center px-6">
+          <ScrollReveal>
+             <h2 className="text-[15vw] leading-[0.8] font-black tracking-tighter uppercase text-white hover:text-[#00F0FF] transition-colors cursor-pointer">
+                 LET'S<br/>TALK
+             </h2>
+          </ScrollReveal>
+          
+          <ScrollReveal delay={0.2} className="mt-20">
+              <Link href="/register" className="inline-block px-12 py-6 rounded-full border border-white/20 text-xl font-bold text-white hover:bg-white hover:text-black transition-colors uppercase tracking-widest">
+                  Start Your Journey
+              </Link>
+          </ScrollReveal>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="py-12 px-6 md:px-12 bg-[#050505] border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="text-2xl font-black tracking-tighter">AAROHAN © 2026</div>
+          <div className="flex gap-8 text-gray-400 font-bold uppercase tracking-widest text-sm">
+              <Link href="/events" className="hover:text-white transition-colors">Events</Link>
+              <Link href="/sponsors" className="hover:text-white transition-colors">Sponsors</Link>
+              <Link href="/team" className="hover:text-white transition-colors">Team</Link>
+          </div>
+      </footer>
     </div>
   );
 }
