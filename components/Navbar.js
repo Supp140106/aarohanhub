@@ -4,17 +4,26 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X, Rocket, Terminal, Shield, Home, Target, Zap, Activity } from 'lucide-react';
+import { getSessionData } from '@/app/actions/auth';
 
 const Navbar = () => {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [session, setSession] = useState(null);
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll);
+    
+    const fetchSession = async () => {
+      const data = await getSessionData();
+      setSession(data);
+    };
+    fetchSession();
+
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -82,6 +91,7 @@ const Navbar = () => {
 
             <div className="h-8 w-[1px] bg-white/5"></div>
 
+            {!session ? (
             <Link
               href="/login"
               className="relative group overflow-hidden rounded-2xl"
@@ -92,6 +102,18 @@ const Navbar = () => {
                 Establish Link
               </div>
             </Link>
+            ) : (
+            <Link
+              href="/dashboard"
+              className="relative group overflow-hidden rounded-2xl"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-[#00F0FF] to-[#7000FF] opacity-10 group-hover:opacity-20 transition-opacity"></div>
+              <div className="relative px-8 py-4 bg-white/5 backdrop-blur-md text-white font-black text-[10px] uppercase tracking-[0.3em] rounded-2xl border border-white/10 flex items-center gap-3 hover:border-[#00F0FF]/40 transition-all active:scale-95 italic">
+                <Terminal className="w-4 h-4 text-[#00F0FF]" />
+                Dashboard
+              </div>
+            </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -137,6 +159,7 @@ const Navbar = () => {
                 ))}
                 
                 <div className="pt-8 mt-4 border-t border-white/5">
+                   {!session ? (
                    <Link
                      href="/login"
                      onClick={() => setMobileMenuOpen(false)}
@@ -145,6 +168,16 @@ const Navbar = () => {
                      <Terminal className="w-5 h-5" />
                      Establish Link
                    </Link>
+                   ) : (
+                   <Link
+                     href="/dashboard"
+                     onClick={() => setMobileMenuOpen(false)}
+                     className="w-full bg-gradient-to-r from-[#00F0FF] to-[#7000FF] text-black font-black py-6 rounded-3xl text-center text-xs uppercase tracking-[0.4em] shadow-[0_20px_50px_rgba(0,240,255,0.2)] transition-all active:scale-95 flex items-center justify-center gap-4 italic"
+                   >
+                     <Terminal className="w-5 h-5" />
+                     Dashboard
+                   </Link>
+                   )}
                 </div>
             </div>
             

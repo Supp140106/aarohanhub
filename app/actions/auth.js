@@ -170,3 +170,16 @@ export async function loginWithPassword(formData) {
         redirect('/dashboard');
     }
 }
+
+export async function getSessionData() {
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get('session');
+    if (sessionCookie) {
+        try {
+            return JSON.parse(sessionCookie.value);
+        } catch (e) {
+            return null;
+        }
+    }
+    return null;
+}

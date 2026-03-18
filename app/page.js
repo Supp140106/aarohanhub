@@ -3,8 +3,20 @@ import { Rocket, Shield, ShieldCheck, Zap, Target, ArrowRight, Terminal, Globe, 
 import Navbar from '@/components/Navbar';
 import SplineScene from '@/components/SplineScene';
 import ParticleBackground from '@/components/ParticleBackground';
+import { cookies } from 'next/headers';
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get('session');
+  let session = null;
+  if (sessionCookie) {
+      try {
+          session = JSON.parse(sessionCookie.value);
+      } catch (e) {
+          session = null;
+      }
+  }
+
   return (
     <div className="min-h-screen bg-[#050505] selection:bg-[#00F0FF]/30 selection:text-[#00F0FF] relative overflow-hidden">
       <Navbar />
@@ -48,6 +60,7 @@ export default function LandingPage() {
                         </div>
                     </Link>
                     
+                    {!session ? (
                     <Link
                       href="/login"
                       className="px-16 py-6 bg-white/[0.03] border border-white/10 text-white font-black text-[11px] uppercase tracking-[0.4em] rounded-2xl backdrop-blur-3xl hover:bg-white/5 transition-all italic flex items-center justify-center gap-4 active:scale-95"
@@ -55,6 +68,15 @@ export default function LandingPage() {
                         <Terminal className="w-5 h-5 text-gray-500" />
                         OP_LOG_IN
                     </Link>
+                    ) : (
+                    <Link
+                      href="/dashboard"
+                      className="px-16 py-6 bg-white/[0.03] border border-white/10 text-white font-black text-[11px] uppercase tracking-[0.4em] rounded-2xl backdrop-blur-3xl hover:bg-white/5 transition-all italic flex items-center justify-center gap-4 active:scale-95"
+                    >
+                        <Terminal className="w-5 h-5 text-gray-500" />
+                        DASHBOARD
+                    </Link>
+                    )}
                 </div>
                 
                 <div className="mt-24 grid grid-cols-2 md:grid-cols-4 gap-12">
@@ -199,7 +221,11 @@ export default function LandingPage() {
                 </p>
                 
                 <div className="flex flex-col sm:flex-row justify-center gap-10">
-                    <Link href="/register" className="btn-primary px-20 py-8 text-sm tracking-[0.4em] italic shadow-[0_30px_60px_rgba(0,240,255,0.3)] active:scale-95">INITIALIZE_ID</Link>
+                    {!session ? (
+                        <Link href="/register" className="btn-primary px-20 py-8 text-sm tracking-[0.4em] italic shadow-[0_30px_60px_rgba(0,240,255,0.3)] active:scale-95">INITIALIZE_ID</Link>
+                    ) : (
+                        <Link href="/dashboard" className="btn-primary px-20 py-8 text-sm tracking-[0.4em] italic shadow-[0_30px_60px_rgba(0,240,255,0.3)] active:scale-95">DASHBOARD</Link>
+                    )}
                     <Link href="/events" className="px-16 py-8 border border-white/10 bg-white/5 rounded-2xl text-[11px] font-black text-white uppercase tracking-[0.5em] hover:bg-white/10 transition-all italic active:scale-95 flex items-center justify-center gap-4">VIEW_MISSIONS</Link>
                 </div>
             </div>
