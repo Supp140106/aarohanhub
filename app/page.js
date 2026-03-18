@@ -61,8 +61,7 @@ export default async function LandingPage() {
                 {[
                 { label: "Active Participants", val: "5,000+" },
                 { label: "Core Events", val: "15+" },
-                { label: "Prize Pool", val: "₹500K" },
-                { label: "Founded", val: "2010" }
+                { label: "Founded", val: "2003" }
                 ].map((stat, i) => (
                 <div key={i} className="flex flex-col">
                     <span className="text-sm text-gray-500 font-medium uppercase tracking-widest mb-2">{stat.label}</span>
