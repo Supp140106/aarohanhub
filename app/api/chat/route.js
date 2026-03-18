@@ -329,11 +329,33 @@ export async function POST(request) {
             temperature: 0.1, // Very low temperature to minimize hallucination
             max_tokens: 1024,
             top_p: 0.9,
+            stream: true,
         });
 
-        const reply = chatCompletion.choices[0]?.message?.content || 'Sorry, I could not generate a response.';
+        const encoder = new TextEncoder();
+        const stream = new ReadableStream({
+            async start(controller) {
+                try {
+                    for await (const chunk of chatCompletion) {
+                        const content = chunk.choices[0]?.delta?.content || "";
+                        if (content) {
+                            controller.enqueue(encoder.encode(content));
+                        }
+                    }
+                } catch (err) {
+                    controller.error(err);
+                } finally {
+                    controller.close();
+                }
+            }
+        });
 
-        return NextResponse.json({ reply });
+        return new Response(stream, {
+            headers: {
+                'Content-Type': 'text/plain; charset=utf-8',
+                'Cache-Control': 'no-cache, no-transform',
+            },
+        });
     } catch (error) {
         console.error('Chatbot API Error:', error);
 

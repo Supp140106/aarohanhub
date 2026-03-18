@@ -52,3 +52,13 @@ export const verificationTokens = pgTable("verification_tokens", {
   token: varchar("token", { length: 6 }).notNull(),
   expiresAt: timestamp("expires_at").notNull(),
 });
+
+// 6. User Support Queries / Q&A
+export const queries = pgTable("queries", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(), // Participant who asked
+  question: text("question").notNull(),
+  answer: text("answer"), // Null means unanswered
+  answeredById: integer("answered_by_id").references(() => users.id), // Staff who answered
+  createdAt: timestamp("created_at").defaultNow(),
+});

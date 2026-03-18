@@ -4,13 +4,15 @@ import { useState } from 'react';
 import { registerUser, verifyRegistrationOTP } from '@/app/actions/auth';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
+import SplitText from '@/components/ReactBits/SplitText';
+import { ArrowUpRight, ArrowLeft } from 'lucide-react';
 
 export default function RegisterPage() {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    // Store form data to pass to step 2 verification
     const [formDataCache, setFormDataCache] = useState({
         fullName: '',
         email: '',
@@ -44,7 +46,6 @@ export default function RegisterPage() {
         setLoading(true);
         setError('');
 
-        // Re-attach data for the server action
         formData.append('email', formDataCache.email);
         formData.append('fullName', formDataCache.fullName);
         formData.append('role', formDataCache.role);
@@ -57,105 +58,121 @@ export default function RegisterPage() {
         } else {
             toast.success('Account created successfully!');
         }
-        // If success, server action handles the redirect
         setLoading(false);
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-            <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
-                <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Join Aarohan 2026</h2>
+        <div className="h-screen overflow-hidden flex flex-col items-center justify-center bg-[#0a0a0a] text-white p-4 relative font-sans">
+            
+            <Link href="/" className="absolute top-8 left-8 text-gray-500 hover:text-white transition-colors font-bold tracking-widest uppercase text-sm flex items-center gap-2">
+                <ArrowLeft className="w-4 h-4" /> Back to HQ
+            </Link>
+
+            <motion.div 
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: 'easeOut' }}
+                className="w-full max-w-lg relative z-10"
+            >
+                <div className="mb-6 text-center">
+                    <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none mb-2 mt-4">
+                        <SplitText text="INITIALIZE" delay={30} className="block text-[#00F0FF]" />
+                        <SplitText text="NEW NODE" delay={30} className="block" />
+                    </h1>
+                </div>
 
                 {error && (
-                    <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-8 p-4 bg-red-500/10 border border-red-500 text-red-500 font-bold uppercase tracking-widest text-xs text-center">
                         {error}
-                    </div>
+                    </motion.div>
                 )}
 
+                <AnimatePresence mode="wait">
                 {step === 1 ? (
-                    <form action={handleRegister} className="space-y-4">
+                    <motion.form 
+                        key="step1"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        action={handleRegister} 
+                        className="space-y-6"
+                    >
                         <div>
-                            <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
-                                Full Name
-                            </label>
                             <input
                                 type="text"
                                 id="fullName"
                                 name="fullName"
                                 required
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-gray-900"
-                                placeholder="John Doe"
+                                className="w-full px-6 py-4 bg-transparent border-b-2 border-white/20 focus:border-[#00F0FF] outline-none transition-colors text-white text-lg rounded-none placeholder:text-white/20 uppercase font-medium tracking-wider"
+                                placeholder="Full Name"
                             />
                         </div>
 
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                                Email Address
-                            </label>
                             <input
                                 type="email"
                                 id="email"
                                 name="email"
                                 required
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-gray-900"
-                                placeholder="john@example.com"
+                                className="w-full px-6 py-4 bg-transparent border-b-2 border-white/20 focus:border-[#00F0FF] outline-none transition-colors text-white text-lg rounded-none placeholder:text-white/20 uppercase font-medium tracking-wider"
+                                placeholder="Email Address"
                             />
                         </div>
 
                         <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                                Password
-                            </label>
                             <input
                                 type="password"
                                 id="password"
                                 name="password"
                                 required
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-gray-900"
-                                placeholder="Choose a secure password"
+                                className="w-full px-6 py-4 bg-transparent border-b-2 border-white/20 focus:border-[#00F0FF] outline-none transition-colors text-white text-lg rounded-none placeholder:text-white/20 uppercase font-medium tracking-wider"
+                                placeholder="Access Key (Password)"
                             />
                         </div>
 
                         <div>
-                            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
-                                Wait, I am a...
-                            </label>
                             <select
                                 id="role"
                                 name="role"
                                 required
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-gray-900"
+                                className="w-full px-6 py-4 bg-transparent border-b-2 border-white/20 focus:border-[#00F0FF] outline-none transition-colors text-white text-lg rounded-none uppercase font-medium tracking-wider appearance-none cursor-pointer"
                             >
-                                <option value="external">External Participant</option>
-                                <option value="student">University Student</option>
-                                <option value="volunteer">Volunteer</option>
+                                <option value="external" className="bg-[#0a0a0a] text-white">External Participant</option>
+                                <option value="student" className="bg-[#0a0a0a] text-white">NIT Durgapur Student</option>
+                                <option value="volunteer" className="bg-[#0a0a0a] text-white">Volunteer</option>
+                                <option value="organizer" className="bg-[#0a0a0a] text-white">Organizer</option>
                             </select>
-                            <p className="text-xs text-gray-500 mt-1">Organizers and Admin accounts are assigned internally.</p>
                         </div>
 
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition disabled:opacity-50 mt-4"
+                            className="w-full mt-6 bg-white text-black font-black uppercase tracking-widest py-4 px-8 flex items-center justify-center gap-4 hover:bg-[#00F0FF] transition-colors disabled:opacity-50 group"
                         >
-                            {loading ? 'Sending OTP...' : 'Register & Get OTP'}
+                            {loading ? 'Transmitting Data...' : 'Request Validation OTP'}
+                            {!loading && <ArrowUpRight className="w-6 h-6 group-hover:rotate-45 transition-transform" /> }
                         </button>
 
-                        <div className="text-center mt-4">
-                            <Link href="/login" className="text-sm text-blue-600 hover:text-blue-800 font-medium">
-                                Already have an account? Login here.
+                        <div className="text-center mt-6">
+                            <Link href="/login" className="text-sm text-gray-500 hover:text-white uppercase tracking-widest font-bold transition-colors pb-4">
+                                Node Already Initialized? Login
                             </Link>
                         </div>
-                    </form>
+                    </motion.form>
                 ) : (
-                    <form action={handleVerify} className="space-y-4">
+                    <motion.form 
+                        key="step2"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        action={handleVerify} 
+                        className="space-y-8 text-center"
+                    >
                         <div>
-                            <p className="text-sm text-gray-600 mb-4">
-                                We&apos;ve sent a 6-digit OTP to <span className="font-semibold">{formDataCache.email}</span> to verify your registration.
+                            <p className="text-sm text-gray-400 mb-8 uppercase tracking-widest leading-loose">
+                                Security Token Sent To<br/><span className="text-[#00F0FF] font-bold text-lg">{formDataCache.email}</span>
                             </p>
-                            <label htmlFor="token" className="block text-sm font-medium text-gray-700 mb-1">
-                                Enter OTP
-                            </label>
+                            
                             <input
                                 type="text"
                                 id="token"
@@ -163,27 +180,31 @@ export default function RegisterPage() {
                                 required
                                 maxLength={6}
                                 pattern="\d{6}"
-                                className="w-full px-4 py-2 text-center tracking-widest text-xl border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-gray-900"
+                                className="w-full px-4 py-6 bg-transparent border border-white/20 focus:border-[#00F0FF] text-center tracking-[1em] text-4xl rounded-xl outline-none transition-colors text-white uppercase font-black"
                                 placeholder="------"
                             />
                         </div>
+
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition disabled:opacity-50"
+                            className="w-full mt-10 bg-[#00F0FF] text-black font-black uppercase tracking-widest py-6 px-8 flex items-center justify-center gap-4 hover:bg-white transition-colors disabled:opacity-50 group"
                         >
-                            {loading ? 'Verifying & Creating Account...' : 'Verify OTP & Complete Setup'}
+                            {loading ? 'Verifying Integrity...' : 'Confirm Authentication'}
+                            {!loading && <ArrowUpRight className="w-6 h-6 group-hover:rotate-45 transition-transform" /> }
                         </button>
+
                         <button
                             type="button"
                             onClick={() => { setStep(1); setError(''); }}
-                            className="w-full text-sm text-gray-600 hover:text-gray-900 mt-2"
+                            className="w-full text-xs text-gray-500 hover:text-white mt-8 tracking-widest uppercase font-bold transition-colors"
                         >
-                            Back to registration form
+                            Abort Validation Sequence
                         </button>
-                    </form>
+                    </motion.form>
                 )}
-            </div>
+                </AnimatePresence>
+            </motion.div>
         </div>
     );
 }
