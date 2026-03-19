@@ -7,7 +7,7 @@ import BlurText from '@/components/ReactBits/BlurText';
 import Marquee from '@/components/Marquee';
 import FloatingLines from '@/components/ReactBits/FloatingLines';
 import { cookies } from 'next/headers';
-
+import PurpleRobot from '@/components/PurpleRobot';
 export default async function LandingPage() {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get('session');
@@ -82,11 +82,23 @@ export default async function LandingPage() {
       {/* BENTO GRID PROJECTS/SERVICES */}
       <section className="py-40 px-6 md:px-12 bg-white text-black">
         <div className="max-w-7xl mx-auto">
-            <ScrollReveal>
-                <h2 className="text-6xl md:text-8xl font-black tracking-tighter uppercase mb-20 leading-none max-w-4xl">
-                    We design for <span className="text-[#00F0FF]">results</span> — pushing technical boundaries.
-                </h2>
-            </ScrollReveal>
+            <div className="flex flex-col lg:flex-row items-center lg:items-stretch gap-12 mb-20">
+                <ScrollReveal className="flex-1 flex flex-col justify-center">
+                    <h2 className="text-[3.5rem] md:text-[5.5rem] lg:text-[6.5rem] font-black tracking-tighter uppercase leading-[0.9]">
+                        We design for<br/>
+                        <span className="text-[#00F0FF]">results</span> —<br/>
+                        pushing<br/>
+                        technical<br/>
+                        boundaries.
+                    </h2>
+                </ScrollReveal>
+                
+                <ScrollReveal delay={0.2} className="flex-1 w-full min-h-[400px] lg:min-h-[500px] rounded-3xl overflow-hidden shadow-2xl relative border border-white/10">
+                    <div className="absolute inset-0">
+                        <PurpleRobot />
+                    </div>
+                </ScrollReveal>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-12 auto-rows-[400px] gap-6">
                 {/* Large Card */}
