@@ -22,14 +22,7 @@ async function verifyAdmin() {
 
 export async function fetchEvents(userId = null) {
     try {
-        if (!userId) {
-            return (await db.select().from(events)).map(e => ({
-                ...e, isRegistered: false, winner: null
-            }));
-        }
-
-        // Try full query with winner info
-        const results = await db
+        const query = db
             .select({
                 id: events.id,
                 title: events.title,
@@ -41,11 +34,18 @@ export async function fetchEvents(userId = null) {
                 winnerEmail: users.email,
             })
             .from(events)
-            .leftJoin(users, eq(events.winnerId, users.id))
-            .leftJoin(
+            .leftJoin(users, eq(events.winnerId, users.id));
+
+        if (userId) {
+            query.leftJoin(
                 registrations,
                 and(eq(registrations.eventId, events.id), eq(registrations.userId, userId))
             );
+        } else {
+            query.leftJoin(registrations, eq(registrations.id, -1)); // Dummy join to keep select schema consistent
+        }
+
+        const results = await query;
 
         return results.map(r => ({
             id: r.id,
@@ -59,16 +59,10 @@ export async function fetchEvents(userId = null) {
                 email: r.winnerEmail
             } : null
         }));
-    } catch {
-        // Fallback: winner_id column may not exist yet — query without it
+    } catch (e) {
+        // Fallback: winnerId or join might fail if schema is upgrading
         try {
-            if (!userId) {
-                return (await db.select().from(events)).map(e => ({
-                    ...e, isRegistered: false, winner: null
-                }));
-            }
-
-            const results = await db
+            const fallbackQuery = db
                 .select({
                     id: events.id,
                     title: events.title,
@@ -76,11 +70,18 @@ export async function fetchEvents(userId = null) {
                     schedule: events.schedule,
                     isRegistered: registrations.id,
                 })
-                .from(events)
-                .leftJoin(
+                .from(events);
+
+            if (userId) {
+                fallbackQuery.leftJoin(
                     registrations,
                     and(eq(registrations.eventId, events.id), eq(registrations.userId, userId))
                 );
+            } else {
+                fallbackQuery.leftJoin(registrations, eq(registrations.id, -1));
+            }
+
+            const results = await fallbackQuery;
 
             return results.map(r => ({
                 id: r.id,

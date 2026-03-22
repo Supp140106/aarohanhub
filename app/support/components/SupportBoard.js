@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 import { MessageSquarePlus, Send, MessageCircleQuestion, CheckCircle2, AlertCircle } from 'lucide-react';
 import ScrollReveal from '@/components/ScrollReveal';
 
-export default function SupportBoard({ initialQueries, isStaff }) {
+export default function SupportBoard({ initialQueries, isStaff, userName, userRole }) {
     const [queries, setQueries] = useState(initialQueries);
     const [newQuestion, setNewQuestion] = useState('');
     const [submitting, setSubmitting] = useState(false);
@@ -21,21 +21,44 @@ export default function SupportBoard({ initialQueries, isStaff }) {
         if (!newQuestion.trim()) return;
 
         setSubmitting(true);
+        const questionText = newQuestion.trim();
         const formData = new FormData();
-        formData.append('question', newQuestion);
+        formData.append('question', questionText);
         
-        const res = await submitQuery(formData);
+        // Optimistic add
+        const tempId = Date.now();
+        const optimisticQuery = {
+            id: tempId,
+            question: questionText,
+            answer: null,
+            createdAt: new Date().toISOString(),
+            authorName: userName,
+            authorRole: userRole,
+            isOptimistic: true
+        };
         
-        if (res?.error) {
-            toast.error(res.error);
-        } else {
-            toast.success("Question submitted successfully!");
-            setNewQuestion('');
-            // Optional: Optimistically reload or let the user refresh. 
-            // In a real app we'd fetch updated queries here, but revalidatePath will refresh on next load.
-            window.location.reload(); 
+        setQueries(prev => [optimisticQuery, ...prev]);
+        setNewQuestion('');
+        
+        try {
+            const res = await submitQuery(formData);
+            if (res?.error) {
+                toast.error(res.error);
+                setQueries(prev => prev.filter(q => q.id !== tempId));
+                setNewQuestion(questionText);
+            } else {
+                toast.success("Question submitted successfully!");
+                // We could replace the tempId with the real one if we got it back, 
+                // but since we're using revalidatePath, the next data load will sync.
+                // For now, we'll just keep it until the next page load or fetch.
+            }
+        } catch (e) {
+            toast.error("Network error.");
+            setQueries(prev => prev.filter(q => q.id !== tempId));
+            setNewQuestion(questionText);
+        } finally {
+            setSubmitting(false);
         }
-        setSubmitting(false);
     };
 
     const handleAnswerSubmit = async (queryId) => {
@@ -44,24 +67,40 @@ export default function SupportBoard({ initialQueries, isStaff }) {
 
         setAnsweringIds(prev => new Set(prev).add(queryId));
         
+        const oldAnswer = queries.find(q => q.id === queryId)?.answer;
+        
+        // Optimistic answer
+        setQueries(prev => prev.map(q => 
+            q.id === queryId ? { ...q, answer: answerText.trim() } : q
+        ));
+
         const formData = new FormData();
         formData.append('queryId', queryId);
         formData.append('answer', answerText);
         
-        const res = await answerQuery(formData);
-        
-        if (res?.error) {
-            toast.error(res.error);
-        } else {
-            toast.success("Answer posted successfully!");
-            window.location.reload();
+        try {
+            const res = await answerQuery(formData);
+            if (res?.error) {
+                toast.error(res.error);
+                // Rollback
+                setQueries(prev => prev.map(q => 
+                    q.id === queryId ? { ...q, answer: oldAnswer } : q
+                ));
+            } else {
+                toast.success("Answer posted successfully!");
+            }
+        } catch (e) {
+            toast.error("Network error.");
+            setQueries(prev => prev.map(q => 
+                q.id === queryId ? { ...q, answer: oldAnswer } : q
+            ));
+        } finally {
+            setAnsweringIds(prev => {
+                const next = new Set(prev);
+                next.delete(queryId);
+                return next;
+            });
         }
-        
-        setAnsweringIds(prev => {
-            const next = new Set(prev);
-            next.delete(queryId);
-            return next;
-        });
     };
 
     return (

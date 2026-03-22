@@ -11,26 +11,32 @@ export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
     const [loading, setLoading] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-    const [message, setMessage] = useState('');
-
-    const [showRegistrations, setShowRegistrations] = useState(false);
-    const [registrations, setRegistrations] = useState([]);
-    const [loadingRegs, setLoadingRegs] = useState(false);
-    const [settingWinner, setSettingWinner] = useState(false);
+    const [isOptimisticRegistered, setIsOptimisticRegistered] = useState(evt.isRegistered);
 
     async function handleRegister() {
+        // Optimistic Update
+        setIsOptimisticRegistered(true);
         setLoading(true);
         setMessage('');
+        
         const formData = new FormData();
         formData.append('eventId', evt.id);
-        const res = await registerForEvent(formData);
-        if (res?.error) {
-            setMessage(res.error);
-        } else {
-            setMessage('Successfully Registered!');
-            setShowConfirm(false);
+        
+        try {
+            const res = await registerForEvent(formData);
+            if (res?.error) {
+                setMessage(res.error);
+                setIsOptimisticRegistered(false); // Rollback
+            } else {
+                setMessage('Successfully Registered!');
+                setShowConfirm(false);
+            }
+        } catch (e) {
+            setMessage('Network error. Please try again.');
+            setIsOptimisticRegistered(false); // Rollback
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     }
 
     async function handleDeleteConfirmed() {
@@ -134,8 +140,8 @@ export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
                         </button>
                     ) : (
                         <div>
-                            {evt.isRegistered ? (
-                                <span className="bg-emerald-500/10 text-emerald-400 px-5 py-2.5 rounded-full font-black text-xs uppercase tracking-widest border border-emerald-500/20 flex items-center gap-2">
+                            {isOptimisticRegistered ? (
+                                <span className="bg-emerald-500/10 text-emerald-400 px-5 py-2.5 rounded-full font-black text-xs uppercase tracking-widest border border-emerald-500/20 flex items-center gap-2 animate-in fade-in zoom-in duration-300">
                                     ✅ Registered
                                 </span>
                             ) : (!showConfirm && userRole !== 'volunteer') ? (

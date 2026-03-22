@@ -42,7 +42,7 @@ export default async function SupportPage() {
                     </div>
 
                     <div className="flex-1 overflow-y-auto custom-scrollbar pr-4 pb-20">
-                        <SupportBoard initialQueries={queries} isStaff={isStaff} />
+                        <SupportBoard initialQueries={queries} isStaff={isStaff} userName={session.name} userRole={session.role} />
                     </div>
                 </div>
             </div>

@@ -2,7 +2,7 @@
 
 import { db } from '@/db';
 import { queries, users } from '@/db/schema';
-import { eq, or, and, isNotNull, isNull, desc } from 'drizzle-orm';
+import { eq, or, and, isNotNull, isNull, desc, count } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 
@@ -109,10 +109,10 @@ export async function fetchSupportQueries() {
 
 export async function getUnansweredQueryCount() {
     try {
-        const results = await db.select()
+        const results = await db.select({ value: count() })
             .from(queries)
             .where(isNull(queries.answer));
-        return results.length;
+        return results[0]?.value || 0;
     } catch (e) {
         console.error("Fetch Unanswered Query Count Error:", e);
         return 0;
