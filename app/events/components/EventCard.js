@@ -12,6 +12,11 @@ export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
     const [showConfirm, setShowConfirm] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [isOptimisticRegistered, setIsOptimisticRegistered] = useState(evt.isRegistered);
+    const [message, setMessage] = useState('');
+    const [showRegistrations, setShowRegistrations] = useState(false);
+    const [registrations, setRegistrations] = useState([]);
+    const [loadingRegs, setLoadingRegs] = useState(false);
+    const [settingWinner, setSettingWinner] = useState(false);
 
     async function handleRegister() {
         // Optimistic Update
