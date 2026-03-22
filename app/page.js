@@ -8,6 +8,7 @@ import Marquee from '@/components/Marquee';
 import FloatingLines from '@/components/ReactBits/FloatingLines';
 import { cookies } from 'next/headers';
 import PurpleRobot from '@/components/PurpleRobot';
+import IntroScreen from '@/components/IntroScreen';
 export default async function LandingPage() {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get('session');
@@ -22,6 +23,7 @@ export default async function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-white selection:text-black font-sans overflow-x-hidden">
+      <IntroScreen />
       <Navbar />
       
       {/* HERO SECTION */}
@@ -166,8 +168,8 @@ export default async function LandingPage() {
           </ScrollReveal>
           
           <ScrollReveal delay={0.2} className="mt-20">
-              <Link href="/register" className="inline-block px-12 py-6 rounded-full border border-white/20 text-xl font-bold text-white hover:bg-white hover:text-black transition-colors uppercase tracking-widest">
-                  Start Your Journey
+              <Link href={session ? "/dashboard" : "/register"} className="inline-block px-12 py-6 rounded-full border border-white/20 text-xl font-bold text-white hover:bg-white hover:text-black transition-colors uppercase tracking-widest">
+                  {session ? "Dashboard" : "Start Your Journey"}
               </Link>
           </ScrollReveal>
       </section>
