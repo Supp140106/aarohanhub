@@ -24,7 +24,7 @@ export default async function LandingPage() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-white selection:text-black font-sans overflow-x-hidden">
       <IntroScreen />
-      <Navbar />
+      <Navbar isLoggedIn={!!session} />
       
       {/* HERO SECTION */}
       <section className="relative min-h-[90vh] flex flex-col justify-end pb-20 px-6 md:px-12 pt-40">

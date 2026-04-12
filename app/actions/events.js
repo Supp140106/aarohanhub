@@ -177,6 +177,22 @@ export async function registerForEvent(formData) {
     }
 
     try {
+        // Fetch event status
+        const eventDataList = await db.select().from(events).where(eq(events.id, Number(eventId)));
+        if (eventDataList.length === 0) return { error: 'Event not found' };
+        
+        const eventData = eventDataList[0];
+        
+        // CHECK 1: If winner is already declared
+        if (eventData.winnerId) {
+            return { error: 'Registration is closed because a winner has already been declared.' };
+        }
+        
+        // CHECK 2: If event time has already passed
+        if (eventData.schedule && new Date() > new Date(eventData.schedule)) {
+            return { error: 'Registration is closed because the event has already started or finished.' };
+        }
+
         // Check if already registered
         const existing = await db.select().from(registrations).where(
             and(eq(registrations.userId, session.userId), eq(registrations.eventId, Number(eventId)))
@@ -208,6 +224,7 @@ export async function fetchEventRegistrations(eventId) {
     const results = await db
         .select({
             id: registrations.id,
+            userId: registrations.userId,
             fullName: users.fullName,
             email: users.email,
             role: users.role,

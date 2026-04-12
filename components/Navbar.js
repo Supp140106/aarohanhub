@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Activity, Menu, X } from 'lucide-react';
 
-export default function Navbar() {
+export default function Navbar({ isLoggedIn }) {
     const [scrolled, setScrolled] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -40,12 +40,14 @@ export default function Navbar() {
                             {link.label}
                         </Link>
                     ))}
-                    <Link
-                        href="/register"
-                        className="px-8 py-2.5 bg-[#00F0FF]/10 border border-[#00F0FF]/20 rounded-xl text-[10px] font-black text-[#00F0FF] uppercase tracking-[0.4em] hover:bg-[#00F0FF]/20 transition-all"
-                    >
-                        Register
-                    </Link>
+                    {!isLoggedIn && (
+                        <Link
+                            href="/register"
+                            className="px-8 py-2.5 bg-[#00F0FF]/10 border border-[#00F0FF]/20 rounded-xl text-[10px] font-black text-[#00F0FF] uppercase tracking-[0.4em] hover:bg-[#00F0FF]/20 transition-all"
+                        >
+                            Register
+                        </Link>
+                    )}
                 </div>
 
                 {/* Mobile Toggle */}
@@ -64,8 +66,10 @@ export default function Navbar() {
                         { label: 'Events', href: '/events' },
                         { label: 'Dashboard', href: '/dashboard' },
                         { label: 'Support', href: '/support' },
-                        { label: 'Register', href: '/register' },
-                        { label: 'Login', href: '/login' },
+                        ...(!isLoggedIn ? [
+                            { label: 'Register', href: '/register' },
+                            { label: 'Login', href: '/login' }
+                        ] : [])
                     ].map((link) => (
                         <Link
                             key={link.href}

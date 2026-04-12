@@ -18,6 +18,9 @@ export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
     const [loadingRegs, setLoadingRegs] = useState(false);
     const [settingWinner, setSettingWinner] = useState(false);
 
+    // Registration is closed if a winner is declared OR the schedule time has passed
+    const isClosed = evt.winner || (evt.schedule && new Date() > new Date(evt.schedule));
+
     async function handleRegister() {
         // Optimistic Update
         setIsOptimisticRegistered(true);
@@ -149,6 +152,10 @@ export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
                                 <span className="bg-emerald-500/10 text-emerald-400 px-5 py-2.5 rounded-full font-black text-xs uppercase tracking-widest border border-emerald-500/20 flex items-center gap-2 animate-in fade-in zoom-in duration-300">
                                     ✅ Registered
                                 </span>
+                            ) : isClosed ? (
+                                <span className="bg-red-500/10 text-red-400 px-5 py-2.5 rounded-full font-black text-[10px] md:text-xs uppercase tracking-widest border border-red-500/20 flex items-center gap-2 italic opacity-70">
+                                    🔒 Registration Closed
+                                </span>
                             ) : (!showConfirm && userRole !== 'volunteer') ? (
                                 <button
                                     onClick={() => setShowConfirm(true)}
@@ -204,14 +211,14 @@ export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
                                         {reg.isVolunteer && <span className="text-xs text-emerald-400 font-bold">Volunteer</span>}
                                         {isAdmin && !evt.winner && (
                                             <button
-                                                onClick={() => handleSetWinner(reg.id)}
+                                                onClick={() => handleSetWinner(reg.userId)}
                                                 disabled={settingWinner}
                                                 className="bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest transition disabled:opacity-50"
                                             >
                                                 👑 Set Winner
                                             </button>
                                         )}
-                                        {isAdmin && evt.winner?.id === reg.id && (
+                                        {isAdmin && evt.winner?.id === reg.userId && (
                                             <span className="text-yellow-400 font-black text-xs uppercase tracking-widest">🏆 Winner</span>
                                         )}
                                     </div>

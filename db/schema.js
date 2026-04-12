@@ -26,21 +26,21 @@ export const events = pgTable("events", {
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
   schedule: timestamp("schedule"),
-  winnerId: integer("winner_id").references(() => users.id), // Real-time winner tracking
+  winnerId: integer("winner_id").references(() => users.id, { onDelete: "set null" }), // Real-time winner tracking
 });
 
 // 3. Registrations (Many-to-Many relationship)
 export const registrations = pgTable("registrations", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id),
-  eventId: integer("event_id").references(() => events.id),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
+  eventId: integer("event_id").references(() => events.id, { onDelete: "cascade" }),
   isVolunteer: boolean("is_volunteer").default(false),
 });
 
 // 4. Logistics (Accommodation & Food)
 export const logistics = pgTable("logistics", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
   accommodationDetails: text("accommodation_details"),
   foodCouponProvided: boolean("food_coupon_provided").default(false),
 });
@@ -56,9 +56,9 @@ export const verificationTokens = pgTable("verification_tokens", {
 // 6. User Support Queries / Q&A
 export const queries = pgTable("queries", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(), // Participant who asked
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(), // Participant who asked
   question: text("question").notNull(),
   answer: text("answer"), // Null means unanswered
-  answeredById: integer("answered_by_id").references(() => users.id), // Staff who answered
+  answeredById: integer("answered_by_id").references(() => users.id, { onDelete: "set null" }), // Staff who answered
   createdAt: timestamp("created_at").defaultNow(),
 });
