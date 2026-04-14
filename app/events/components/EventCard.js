@@ -4,10 +4,12 @@ import { useState } from 'react';
 import { deleteEvent, registerForEvent, fetchEventRegistrations, setEventWinner } from '@/app/actions/events';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { Calendar, Trophy, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
+import { Calendar, Trophy, ChevronDown, ChevronUp, Trash2, Loader2 } from 'lucide-react';
 import ConfirmModal from '@/app/dashboard/components/ConfirmModal';
+import { useRouter } from 'next/navigation';
 
 export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
+    const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -158,10 +160,10 @@ export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
                                 </span>
                             ) : (!showConfirm && userRole !== 'volunteer') ? (
                                 <button
-                                    onClick={() => setShowConfirm(true)}
+                                    onClick={() => userRole ? setShowConfirm(true) : router.push('/login')}
                                     className="bg-[#00F0FF] text-black font-black py-2.5 px-6 rounded-full transition hover:bg-white text-xs uppercase tracking-widest"
                                 >
-                                    Register Now
+                                    {userRole ? 'Register Now' : 'Login to Register'}
                                 </button>
                             ) : userRole === 'volunteer' ? (
                                 <span className="text-xs text-gray-500 italic font-bold uppercase tracking-widest">Staff Account</span>
@@ -171,9 +173,10 @@ export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
                                     <button
                                         onClick={handleRegister}
                                         disabled={loading}
-                                        className="bg-emerald-500 text-black font-black py-2 px-4 rounded-full text-xs uppercase tracking-widest hover:bg-emerald-400 disabled:opacity-50"
+                                        className="bg-emerald-500 text-black flex items-center gap-2 font-black py-2 px-4 rounded-full text-xs uppercase tracking-widest hover:bg-emerald-400 disabled:opacity-50"
                                     >
-                                        {loading ? '...' : 'Confirm'}
+                                        {loading && <Loader2 className="w-3 h-3 animate-spin shrink-0" />}
+                                        {loading ? 'Confirming...' : 'Confirm'}
                                     </button>
                                     <button
                                         onClick={() => setShowConfirm(false)}
@@ -193,7 +196,9 @@ export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
                 <div className="border-t border-white/10 bg-white/[0.02] p-6">
                     <h4 className="font-black text-white mb-4 text-sm uppercase tracking-widest">Registered Users ({registrations.length})</h4>
                     {loadingRegs ? (
-                        <p className="text-sm text-gray-500">Loading...</p>
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <Loader2 className="w-4 h-4 animate-spin text-purple-500" /> Fetching secure records...
+                        </div>
                     ) : registrations.length === 0 ? (
                         <p className="text-sm text-gray-500">No one has registered for this event yet.</p>
                     ) : (
@@ -213,9 +218,9 @@ export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
                                             <button
                                                 onClick={() => handleSetWinner(reg.userId)}
                                                 disabled={settingWinner}
-                                                className="bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest transition disabled:opacity-50"
+                                                className="bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 px-4 py-2 flex items-center gap-2 rounded-full text-xs font-black uppercase tracking-widest transition disabled:opacity-50"
                                             >
-                                                👑 Set Winner
+                                                {settingWinner ? <Loader2 className="w-3 h-3 animate-spin" /> : '👑'} {settingWinner ? 'Setting...' : 'Set Winner'}
                                             </button>
                                         )}
                                         {isAdmin && evt.winner?.id === reg.userId && (

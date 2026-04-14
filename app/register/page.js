@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import SplitText from '@/components/ReactBits/SplitText';
-import { ArrowUpRight, ArrowLeft } from 'lucide-react';
+import { ArrowUpRight, ArrowLeft, Loader2 } from 'lucide-react';
 
 export default function RegisterPage() {
     const [step, setStep] = useState(1);
@@ -149,6 +149,7 @@ export default function RegisterPage() {
                                 disabled={loading}
                                 className="w-full mt-6 bg-white text-black font-black uppercase tracking-widest py-4 px-8 flex items-center justify-center gap-4 hover:bg-[#00F0FF] transition-colors disabled:opacity-50 group"
                             >
+                                {loading && <Loader2 className="w-5 h-5 animate-spin shrink-0" />}
                                 {loading ? 'Transmitting Data...' : 'Request Validation OTP'}
                                 {!loading && <ArrowUpRight className="w-6 h-6 group-hover:rotate-45 transition-transform" />}
                             </button>
@@ -190,8 +191,9 @@ export default function RegisterPage() {
                                 disabled={loading}
                                 className="w-full mt-10 bg-[#00F0FF] text-black font-black uppercase tracking-widest py-6 px-8 flex items-center justify-center gap-4 hover:bg-white transition-colors disabled:opacity-50 group"
                             >
+                                {loading && <Loader2 className="w-5 h-5 animate-spin shrink-0 text-black" />}
                                 {loading ? 'Verifying Integrity...' : 'Confirm Authentication'}
-                                {!loading && <ArrowUpRight className="w-6 h-6 group-hover:rotate-45 transition-transform" />}
+                                {!loading && <ArrowUpRight className="w-6 h-6 group-hover:rotate-45 transition-transform text-black" />}
                             </button>
 
                             <button

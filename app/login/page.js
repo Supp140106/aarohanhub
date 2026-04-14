@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import SplitText from '@/components/ReactBits/SplitText';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
     const [loading, setLoading] = useState(false);
@@ -78,6 +78,7 @@ export default function LoginPage() {
                         disabled={loading}
                         className="w-full mt-10 bg-white text-black font-black uppercase tracking-widest py-6 px-8 flex items-center justify-center gap-4 hover:bg-[#00F0FF] transition-colors disabled:opacity-50 group"
                     >
+                        {loading && <Loader2 className="w-5 h-5 animate-spin shrink-0" />}
                         {loading ? 'Authenticating...' : 'Enter Arena'}
                         {!loading && <ArrowUpRight className="w-6 h-6 group-hover:rotate-45 transition-transform" /> }
                     </button>

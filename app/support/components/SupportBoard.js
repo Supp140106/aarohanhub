@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { submitQuery, answerQuery } from '@/app/actions/support';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { MessageSquarePlus, Send, MessageCircleQuestion, CheckCircle2, AlertCircle } from 'lucide-react';
+import { MessageSquarePlus, Send, MessageCircleQuestion, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import ScrollReveal from '@/components/ScrollReveal';
 
 export default function SupportBoard({ initialQueries, isStaff, userName, userRole }) {
@@ -134,6 +134,7 @@ export default function SupportBoard({ initialQueries, isStaff, userName, userRo
                                     disabled={submitting}
                                     className="bg-[#00F0FF] text-black font-black uppercase tracking-widest text-sm px-8 py-4 rounded-xl hover:bg-white transition-colors flex items-center gap-3 disabled:opacity-50 hover:shadow-[0_0_20px_rgba(0,240,255,0.4)]"
                                 >
+                                    {submitting && <Loader2 className="w-4 h-4 animate-spin shrink-0" />}
                                     {submitting ? 'Submitting...' : 'Submit Query'} <Send className="w-4 h-4" />
                                 </button>
                             </div>
@@ -208,8 +209,9 @@ export default function SupportBoard({ initialQueries, isStaff, userName, userRo
                                                 <button
                                                     onClick={() => handleAnswerSubmit(q.id)}
                                                     disabled={answeringIds.has(q.id)}
-                                                    className="bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500 hover:text-black font-bold uppercase tracking-widest text-xs px-6 rounded-xl transition-all disabled:opacity-50 whitespace-nowrap"
+                                                    className="bg-yellow-500/10 text-yellow-500 flex items-center gap-2 hover:bg-yellow-500 hover:text-black font-bold uppercase tracking-widest text-xs px-6 rounded-xl transition-all disabled:opacity-50 whitespace-nowrap"
                                                 >
+                                                    {answeringIds.has(q.id) && <Loader2 className="w-3 h-3 animate-spin shrink-0" />}
                                                     {answeringIds.has(q.id) ? 'Posting...' : 'Post Reply'}
                                                 </button>
                                             </div>

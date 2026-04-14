@@ -1,6 +1,8 @@
 'use client';
 
-export default function ConfirmModal({ isOpen, title, message, onConfirm, onCancel, confirmText = 'Confirm', variant = 'danger' }) {
+import { Loader2 } from 'lucide-react';
+
+export default function ConfirmModal({ isOpen, title, message, onConfirm, onCancel, confirmText = 'Confirm', variant = 'danger', loading = false }) {
     if (!isOpen) return null;
 
     const variantStyles = {
@@ -31,8 +33,10 @@ export default function ConfirmModal({ isOpen, title, message, onConfirm, onCanc
                     <div className="flex flex-col gap-3">
                         <button
                             onClick={onConfirm}
-                            className={`w-full py-4 rounded-2xl text-white font-black uppercase text-xs tracking-widest transition-all shadow-xl ${variantStyles[variant]}`}
+                            disabled={loading}
+                            className={`w-full py-4 flex items-center justify-center gap-2 rounded-2xl text-white font-black uppercase text-xs tracking-widest transition-all shadow-xl disabled:opacity-50 ${variantStyles[variant]}`}
                         >
+                            {loading && <Loader2 className="w-4 h-4 animate-spin shrink-0" />}
                             {confirmText}
                         </button>
                         <button

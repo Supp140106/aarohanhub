@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 const authRoutes = ['/login', '/register'];
 
 // Routes that require the user to be logged IN (protected pages)
-const protectedRoutes = ['/dashboard', '/events', '/logistics', '/learn'];
+const protectedRoutes = ['/dashboard', '/logistics', '/learn'];
 
 export function middleware(request) {
     const { pathname } = request.nextUrl;

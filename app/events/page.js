@@ -8,6 +8,7 @@ import SplitText from '@/components/ReactBits/SplitText';
 import Shell from '@/components/Shell';
 import { ArrowLeft, Calendar, Plus } from 'lucide-react';
 import SpotlightCard from '@/components/ReactBits/SpotlightCard';
+import SubmitButton from '@/components/SubmitButton';
 
 export default async function EventsPage() {
     const cookieStore = await cookies();
@@ -123,9 +124,12 @@ export default async function EventsPage() {
                                         </div>
                                     </div>
 
-                                    <button type="submit" className="w-full bg-purple-600 text-white font-black uppercase tracking-[0.4em] text-[11px] py-6 rounded-3xl hover:bg-purple-500 transition-all active:scale-[0.98] shadow-[0_25px_50px_rgba(168,85,247,0.25)] mt-6 mb-12">
+                                    <SubmitButton 
+                                        className="w-full bg-purple-600 text-white font-black uppercase tracking-[0.4em] text-[11px] py-6 rounded-3xl hover:bg-purple-500 hover:shadow-[0_25px_50px_rgba(168,85,247,0.4)] active:scale-[0.98] shadow-[0_25px_50px_rgba(168,85,247,0.25)] mt-6 mb-12"
+                                        loadingText="Authorizing..."
+                                    >
                                         Authorize Deployment
-                                    </button>
+                                    </SubmitButton>
                                 </form>
                             </div>
                            </SpotlightCard>
