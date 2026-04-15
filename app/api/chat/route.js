@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { db } from '@/db';
 import { users, events, registrations, logistics } from '@/db/schema';
-import { eq, ne, count, and } from 'drizzle-orm';
+import { eq, ne, count, and, isNotNull } from 'drizzle-orm';
 import Groq from 'groq-sdk';
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
@@ -81,11 +81,38 @@ async function getContextForRole(role, userId) {
     });
 
     // --- Event Info (available to everyone) ---
-    const allEvents = await db.select().from(events);
+    // Join users table so we can include the winner's name in context
+    const allEvents = await db
+        .select({
+            id: events.id,
+            title: events.title,
+            description: events.description,
+            schedule: events.schedule,
+            winnerId: events.winnerId,
+            winnerName: users.fullName,
+            winnerEmail: users.email,
+        })
+        .from(events)
+        .leftJoin(users, eq(events.winnerId, users.id));
+
     context += `\n### Events (${allEvents.length} total)\n`;
     allEvents.forEach(e => {
-        context += `- "${e.title}" (ID: ${e.id}) - ${e.description || 'No description'} - Scheduled: ${e.schedule ? new Date(e.schedule).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) : 'TBA'}\n`;
+        const winnerInfo = e.winnerId
+            ? `✅ Winner Declared: ${e.winnerName || 'Unknown'} (ID: ${e.winnerId})`
+            : `🏆 Winner: Not yet declared`;
+        context += `- "${e.title}" (ID: ${e.id}) - ${e.description || 'No description'} - Scheduled: ${e.schedule ? new Date(e.schedule).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) : 'TBA'} | ${winnerInfo}\n`;
     });
+
+    // --- Events with declared winners summary ---
+    const eventsWithWinners = allEvents.filter(e => e.winnerId !== null);
+    if (eventsWithWinners.length > 0) {
+        context += `\n### 🏆 Events With Declared Winners (${eventsWithWinners.length})\n`;
+        eventsWithWinners.forEach(e => {
+            context += `- "${e.title}" → Winner: **${e.winnerName || 'Unknown'}** (User ID: ${e.winnerId})\n`;
+        });
+    } else {
+        context += `\n### 🏆 Events With Declared Winners\nNo winners have been declared for any event yet.\n`;
+    }
 
     // --- Registration counts per event (available to everyone) ---
     const regCounts = await db
