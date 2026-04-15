@@ -8,7 +8,7 @@ import { Calendar, Trophy, ChevronDown, ChevronUp, Trash2, Loader2 } from 'lucid
 import ConfirmModal from '@/app/dashboard/components/ConfirmModal';
 import { useRouter } from 'next/navigation';
 
-export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
+export default function EventCard({ evt, isAdmin, isStaff, userRole, userId }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
@@ -22,6 +22,8 @@ export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
 
     // Registration is closed if a winner is declared OR the schedule time has passed
     const isClosed = evt.winner || (evt.schedule && new Date() > new Date(evt.schedule));
+
+    const canManageEvent = userRole === 'dba' || (userRole === 'organizer' && evt.organizerId === userId);
 
     async function handleRegister() {
         // Optimistic Update
@@ -102,7 +104,7 @@ export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
                 {/* Header */}
                 <div className="flex justify-between items-start mb-4">
                     <h2 className="text-2xl font-black text-white tracking-tight">{evt.title}</h2>
-                    {isAdmin && (
+                    {canManageEvent && (
                         <button
                             onClick={() => setShowDeleteConfirm(true)}
                             className="w-10 h-10 rounded-full flex items-center justify-center bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white hover:shadow-[0_0_15px_rgba(239,68,68,0.5)] transition-all shrink-0"
@@ -214,7 +216,7 @@ export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
                                             {reg.role}
                                         </span>
                                         {reg.isVolunteer && <span className="text-xs text-emerald-400 font-bold">Volunteer</span>}
-                                        {isAdmin && !evt.winner && (
+                                        {canManageEvent && !evt.winner && (
                                             <button
                                                 onClick={() => handleSetWinner(reg.userId)}
                                                 disabled={settingWinner}
@@ -223,7 +225,7 @@ export default function EventCard({ evt, isAdmin, isStaff, userRole }) {
                                                 {settingWinner ? <Loader2 className="w-3 h-3 animate-spin" /> : '👑'} {settingWinner ? 'Setting...' : 'Set Winner'}
                                             </button>
                                         )}
-                                        {isAdmin && evt.winner?.id === reg.userId && (
+                                        {canManageEvent && evt.winner?.id === reg.userId && (
                                             <span className="text-yellow-400 font-black text-xs uppercase tracking-widest">🏆 Winner</span>
                                         )}
                                     </div>

@@ -116,10 +116,8 @@ export async function verifyRegistrationOTP(formData) {
     await db.delete(verificationTokens).where(eq(verificationTokens.email, email));
 
     // Determine redirection
-    if (user.role === 'dba') {
+    if (user.role === 'organizer' || user.role === 'dba') {
         redirect('/dashboard');
-    } else if (user.role === 'organizer') {
-        redirect('/dashboard/organizer');
     } else {
         redirect('/dashboard');
     }
@@ -162,10 +160,8 @@ export async function loginWithPassword(formData) {
     });
 
     // Determine redirection
-    if (user.role === 'dba') {
+    if (user.role === 'dba' || user.role === 'organizer') {
         redirect('/dashboard');
-    } else if (user.role === 'organizer') {
-        redirect('/dashboard/organizer');
     } else {
         redirect('/dashboard');
     }

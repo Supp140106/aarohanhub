@@ -11,13 +11,13 @@ async function verifyStaff() {
     const sessionCookie = cookieStore.get('session');
     if (!sessionCookie) return null;
     const session = JSON.parse(sessionCookie.value);
-    if (session.role === 'dba' || session.role === 'volunteer') return session;
+    if (session.role === 'dba' || session.role === 'volunteer' || session.role === 'organizer') return session;
     return null;
 }
 
 async function verifyAdmin() {
     const session = await verifyStaff();
-    return session?.role === 'dba';
+    return (session?.role === 'dba' || session?.role === 'organizer') ? session : null;
 }
 
 export async function fetchEvents(userId = null) {
@@ -28,6 +28,7 @@ export async function fetchEvents(userId = null) {
                 title: events.title,
                 description: events.description,
                 schedule: events.schedule,
+                organizerId: events.organizerId,
                 isRegistered: registrations.id,
                 winnerId: events.winnerId,
                 winnerName: users.fullName,
@@ -52,6 +53,7 @@ export async function fetchEvents(userId = null) {
             title: r.title,
             description: r.description,
             schedule: r.schedule,
+            organizerId: r.organizerId,
             isRegistered: !!r.isRegistered,
             winner: r.winnerId ? {
                 id: r.winnerId,
@@ -68,6 +70,7 @@ export async function fetchEvents(userId = null) {
                     title: events.title,
                     description: events.description,
                     schedule: events.schedule,
+                    organizerId: events.organizerId,
                     isRegistered: registrations.id,
                 })
                 .from(events);
@@ -88,6 +91,7 @@ export async function fetchEvents(userId = null) {
                 title: r.title,
                 description: r.description,
                 schedule: r.schedule,
+                organizerId: r.organizerId,
                 isRegistered: !!r.isRegistered,
                 winner: null
             }));
@@ -98,7 +102,8 @@ export async function fetchEvents(userId = null) {
 }
 
 export async function addEvent(formData) {
-    if (!(await verifyAdmin())) return { error: "Unauthorized" };
+    const session = await verifyAdmin();
+    if (!session) return { error: "Unauthorized" };
 
     const title = formData.get('title');
     const description = formData.get('description');
@@ -112,7 +117,8 @@ export async function addEvent(formData) {
         await db.insert(events).values({
             title,
             description,
-            schedule: new Date(schedule)
+            schedule: new Date(schedule),
+            organizerId: session.userId
         });
         revalidatePath('/events');
         return { success: true };
@@ -122,13 +128,17 @@ export async function addEvent(formData) {
 }
 
 export async function deleteEvent(formData) {
-    if (!(await verifyAdmin())) return { error: "Unauthorized" };
+    const session = await verifyAdmin();
+    if (!session) return { error: "Unauthorized" };
 
     const id = Number(formData.get('id'));
     
     if (!id) return { error: 'Invalid Event ID' };
 
     try {
+        const eventRecords = await db.select().from(events).where(eq(events.id, id));
+        if (eventRecords.length === 0) return { error: 'Event not found' };
+        if (session.role !== 'dba' && eventRecords[0].organizerId !== session.userId) return { error: "Unauthorized: You can only delete your own events." };
         // Step 1: Delete all registrations associated with this event to avoid Postgres Foreign Key Constraint Violation
         await db.delete(registrations).where(eq(registrations.eventId, id));
         
@@ -144,13 +154,18 @@ export async function deleteEvent(formData) {
 }
 
 export async function updateEvent(formData) {
-    if (!(await verifyAdmin())) return { error: "Unauthorized" };
+    const session = await verifyAdmin();
+    if (!session) return { error: "Unauthorized" };
 
     const id = formData.get('id');
     const title = formData.get('title');
     const description = formData.get('description');
 
     try {
+        const eventRecords = await db.select().from(events).where(eq(events.id, Number(id)));
+        if (eventRecords.length === 0) return { error: 'Event not found' };
+        if (session.role !== 'dba' && eventRecords[0].organizerId !== session.userId) return { error: "Unauthorized: You can only update your own events." };
+
         await db.update(events).set({ title, description }).where(eq(events.id, Number(id)));
         revalidatePath('/events');
         return { success: true };
@@ -238,7 +253,8 @@ export async function fetchEventRegistrations(eventId) {
 }
 
 export async function setEventWinner(formData) {
-    if (!(await verifyAdmin())) return { error: "Unauthorized" };
+    const session = await verifyAdmin();
+    if (!session) return { error: "Unauthorized" };
 
     const eventId = formData.get('eventId');
     const winnerId = formData.get('winnerId');
@@ -248,6 +264,10 @@ export async function setEventWinner(formData) {
     }
 
     try {
+        const eventRecords = await db.select().from(events).where(eq(events.id, Number(eventId)));
+        if (eventRecords.length === 0) return { error: 'Event not found' };
+        if (session.role !== 'dba' && eventRecords[0].organizerId !== session.userId) return { error: "Unauthorized: You can only declare the winner for your own events." };
+
         await db.update(events).set({ winnerId: Number(winnerId) }).where(eq(events.id, Number(eventId)));
         revalidatePath('/events');
         return { success: true };

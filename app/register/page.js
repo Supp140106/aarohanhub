@@ -140,6 +140,7 @@ export default function RegisterPage() {
                                     <option value="external" className="bg-[#0a0a0a] text-white">External Participant</option>
                                     <option value="student" className="bg-[#0a0a0a] text-white">NIT Durgapur Student</option>
                                     <option value="volunteer" className="bg-[#0a0a0a] text-white">Volunteer</option>
+                                    <option value="organizer" className="bg-[#0a0a0a] text-white">Event Organizer</option>
 
                                 </select>
                             </div>

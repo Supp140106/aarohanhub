@@ -19,8 +19,11 @@ CREATE TABLE events (
     description TEXT,
     schedule TIMESTAMP,
     winner_id INT,
+    organizer_id INT,
     FOREIGN KEY (winner_id) REFERENCES users(id)
-        ON DELETE SET NULL
+        ON DELETE SET NULL,
+    FOREIGN KEY (organizer_id) REFERENCES users(id)
+        ON DELETE CASCADE
 );
 
 CREATE TABLE registrations (

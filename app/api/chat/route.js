@@ -27,7 +27,7 @@ Roles are one of: "external", "student", "volunteer", "organizer", "dba"
 - "student" role = Internal Students (students of NIT Durgapur)
 - "external" role = External Participants (from other colleges/outside)
 - "volunteer" role = Festival Volunteers (staff who help run the event)
-- "organizer" role = Event Organizers
+- "organizer" role = Event Organizers (can manage their own created events, and see participants mapped to their events only)
 - "dba" role = Database Administrator / Super Admin
 
 When users say "internal students", they mean users with role="student".
@@ -50,9 +50,10 @@ Stores accommodation and food coupon info. Only assigned to students and externa
 
 ### Platform Rules
 1. Volunteers manage logistics and view registrations, but cannot register for events themselves.
-2. DBAs (admins) have full access to everything.
-3. Students and External users can only see their own data.
-4. The chatbot is READ-ONLY - it cannot create, modify, or delete any data.
+2. Organizers manage events they have created. They can only see registrations specific to their events.
+3. DBAs (admins) have full access to everything.
+4. Students and External users can only see their own data.
+5. The chatbot is READ-ONLY - it cannot create, modify, or delete any data.
 `;
 
 // =====================================================================
@@ -214,6 +215,43 @@ async function getContextForRole(role, userId) {
             });
         }
 
+    } else if (role === 'organizer') {
+        context += `\n### Your Organizer Data (you can only see details for events you organized)\n`;
+        
+        const ownEvents = await db.select().from(events).where(eq(events.organizerId, userId));
+        const eventIds = ownEvents.map(e => e.id);
+        
+        context += `\n#### Events You Organized (${ownEvents.length})\n`;
+        if (ownEvents.length === 0) {
+            context += `You have not organized any events yet.\n`;
+        } else {
+            ownEvents.forEach(e => {
+                context += `- "${e.title}" (ID: ${e.id}) - Scheduled: ${e.schedule ? new Date(e.schedule).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) : 'TBA'}\n`;
+            });
+        }
+        
+        if (eventIds.length > 0) {
+            const allRegs = await db.select({
+                userName: users.fullName,
+                userEmail: users.email,
+                userRole: users.role,
+                eventTitle: events.title,
+                eventId: events.id,
+            }).from(registrations)
+              .leftJoin(users, eq(registrations.userId, users.id))
+              .leftJoin(events, eq(registrations.eventId, events.id));
+
+            const myRegs = allRegs.filter(r => eventIds.includes(r.eventId));
+            
+            context += `\n#### Participant Registrations for Your Events (${myRegs.length})\n`;
+            if (myRegs.length === 0) {
+                context += `No registrations for your events yet.\n`;
+            } else {
+                myRegs.forEach(r => {
+                    context += `- ${r.userName} (${r.userRole}) → "${r.eventTitle}"\n`;
+                });
+            }
+        }
     } else {
         // Student or External: only own data
         context += `\n### Your Data (you can only see your own information)\n`;
@@ -261,9 +299,11 @@ function buildSystemPrompt(role, userName, dataContext) {
 
     const accessDescription = role === 'dba'
         ? 'You have FULL access to all platform data including all users, events, registrations, and logistics.'
-        : role === 'volunteer'
-            ? 'You can see all non-admin users, all event registrations, and logistics for participants (not volunteers). You CANNOT see admin/DBA user details.'
-            : 'You can ONLY see your own registrations and logistics, plus general event and platform statistics. You CANNOT see other users\' data. If asked about other users, politely explain they need a higher access level.';
+        : role === 'organizer'
+            ? 'You can see platform statistics, full event list, but ONLY participant details and registrations for events YOU have organized.'
+            : role === 'volunteer'
+                ? 'You can see all non-admin users, all event registrations, and logistics for participants (not volunteers). You CANNOT see admin/DBA user details.'
+                : 'You can ONLY see your own registrations and logistics, plus general event and platform statistics. You CANNOT see other users\' data. If asked about other users, politely explain they need a higher access level.';
 
     return `You are **Aarohan Assistant**, the official AI chatbot for the Aarohan 2026 Tech Festival Hub at NIT Durgapur.
 

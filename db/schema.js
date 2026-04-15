@@ -27,6 +27,7 @@ export const events = pgTable("events", {
   description: text("description"),
   schedule: timestamp("schedule"),
   winnerId: integer("winner_id").references(() => users.id, { onDelete: "set null" }), // Real-time winner tracking
+  organizerId: integer("organizer_id").references(() => users.id, { onDelete: "cascade" }),
 });
 
 // 3. Registrations (Many-to-Many relationship)

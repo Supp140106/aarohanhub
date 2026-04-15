@@ -23,8 +23,8 @@ export default async function EventsPage() {
 
     if (sessionCookie) {
         const session = JSON.parse(sessionCookie.value);
-        isAdmin = session.role === 'dba';
-        isStaff = session.role === 'dba' || session.role === 'volunteer';
+        isAdmin = session.role === 'dba' || session.role === 'organizer';
+        isStaff = session.role === 'dba' || session.role === 'volunteer' || session.role === 'organizer';
         userRole = session.role;
         userId = session.userId;
         userName = session.name || 'User';
@@ -75,7 +75,7 @@ export default async function EventsPage() {
                                 <div className="space-y-6">
                                     {eventsList.map((evt, idx) => (
                                         <ScrollReveal key={evt.id} delay={idx * 0.05}>
-                                            <EventCard evt={evt} isAdmin={isAdmin} isStaff={isStaff} userRole={userRole} />
+                                            <EventCard evt={evt} isAdmin={isAdmin} isStaff={isStaff} userRole={userRole} userId={userId} />
                                         </ScrollReveal>
                                     ))}
                                 </div>

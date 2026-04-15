@@ -23,7 +23,7 @@ export default function EventDatePicker() {
     const finalISOString = combinedDate.toISOString();
 
     return (
-        <div className="relative">
+        <div className="relative overflow-visible">
             <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-widest">Date & Time</label>
             
             {/* Hidden native input for the Server Action to catch */}
@@ -44,7 +44,7 @@ export default function EventDatePicker() {
 
             {/* Custom Popover */}
             {isOpen && (
-                <div className="absolute top-full mt-2 right-0 z-50 bg-[#0a0a0a] border border-[#00F0FF]/30 p-5 rounded-2xl shadow-[0_0_30px_rgba(0,240,255,0.15)] animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="absolute bottom-full mb-2 right-0 z-[999] bg-[#0a0a0a] border border-[#00F0FF]/30 p-5 rounded-2xl shadow-[0_0_30px_rgba(0,240,255,0.2)] animate-in fade-in slide-in-from-bottom-2 duration-200">
                     <style>{`
                         .rdp {
                             --rdp-cell-size: 38px;

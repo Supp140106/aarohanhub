@@ -48,7 +48,8 @@ CREATE TABLE "events" (
     "title"       VARCHAR(255) NOT NULL,
     "description" TEXT,
     "schedule"    TIMESTAMP,
-    "winner_id"   INTEGER
+    "winner_id"   INTEGER,
+    "organizer_id" INTEGER
 );
 
 ALTER TABLE "events"
@@ -56,6 +57,13 @@ ALTER TABLE "events"
     FOREIGN KEY ("winner_id")
     REFERENCES "public"."users"("id")
     ON DELETE SET NULL
+    ON UPDATE NO ACTION;
+
+ALTER TABLE "events"
+    ADD CONSTRAINT "events_organizer_id_users_id_fk"
+    FOREIGN KEY ("organizer_id")
+    REFERENCES "public"."users"("id")
+    ON DELETE CASCADE
     ON UPDATE NO ACTION;
 
 
